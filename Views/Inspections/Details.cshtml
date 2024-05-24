@@ -1,0 +1,146 @@
+﻿@model PartsMySql.Models.Inspection
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Inspection</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.comments)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.comments)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ctrlNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ctrlNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.dateEnd)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.dateEnd)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.dateStart)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.dateStart)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.humidity)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.humidity)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.inspectionTimeSpan)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.inspectionTimeSpan)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.inspectorComments)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.inspectorComments)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.isArchived)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.isArchived)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.isForReports)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.isForReports)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.isRewrite)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.isRewrite)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.lotNumber)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.lotNumber)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.quantity)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.quantity)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.sampleSize)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.sampleSize)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.temperature)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.temperature)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.totalTimeSpan)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.totalTimeSpan)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VERSION)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VERSION)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

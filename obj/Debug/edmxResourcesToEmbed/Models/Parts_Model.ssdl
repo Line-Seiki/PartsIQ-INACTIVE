@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="PartsIQModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <!--Errors Found During Generation:
+warning 6013: The table/view 'PartsIQ.dbo.InspectionDetailsView' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="InspectionDetailsView">
+          <Property Name="id" Type="bigint" />
+          <Property Name="Decision" Type="nvarchar" MaxLength="255" />
+          <Property Name="Evaluator" Type="nvarchar" MaxLength="50" />
+          <Property Name="Inspector" Type="nvarchar" MaxLength="50" />
+          <Property Name="ControlNumber" Type="ntext" />
+          <Property Name="DateFinished" Type="datetime2" Precision="7" />
+          <Property Name="PartsCode" Type="nvarchar" MaxLength="50" />
+          <Property Name="PartName" Type="nvarchar" MaxLength="255" />
+          <Property Name="LotNumber" Type="ntext" />
+          <Property Name="LotQuantity" Type="int" />
+          <Property Name="DrNumber" Type="nvarchar" MaxLength="255" />
+          <Property Name="Time" Type="bigint" />
+          <Property Name="Comments" Type="ntext" />
+          <Property Name="InspectorComments" Type="ntext" />
+          <Property Name="ncrNumber" Type="nvarchar" MaxLength="255" />
+        </EntityType>-->
+  <!--Errors Found During Generation:
+warning 6013: The table/view 'PartsIQ.dbo.SupplierDetailsView' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="SupplierDetailsView">
+          <Property Name="Id" Type="bigint" />
+          <Property Name="InCharge" Type="nvarchar" MaxLength="255" />
+          <Property Name="Name" Type="nvarchar" MaxLength="255" />
+          <Property Name="Version" Type="int" />
+        </EntityType>-->
+  <!--Errors Found During Generation:
+warning 6013: The table/view 'PartsIQ.dbo.vwInspection' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="vwInspection">
+          <Property Name="id" Type="bigint" />
+          <Property Name="comments" Type="nvarchar" MaxLength="255" />
+          <Property Name="ctrlNumber" Type="nvarchar" MaxLength="255" />
+          <Property Name="dateEnd" Type="datetime2" Precision="7" />
+          <Property Name="dateStart" Type="datetime2" Precision="7" />
+          <Property Name="humidity" Type="float" />
+          <Property Name="inspectionTimeSpan" Type="bigint" />
+          <Property Name="inspectorComments" Type="nvarchar" MaxLength="255" />
+          <Property Name="isArchived" Type="bit" />
+          <Property Name="isForReports" Type="bit" />
+          <Property Name="lotNumber" Type="nvarchar" MaxLength="255" />
+          <Property Name="quantity" Type="int" />
+          <Property Name="sampleSize" Type="int" />
+          <Property Name="status" Type="int" />
+          <Property Name="temperature" Type="float" />
+          <Property Name="totalTimeSpan" Type="bigint" />
+          <Property Name="VERSION" Type="int" />
+          <Property Name="Decision_ID" Type="bigint" />
+          <Property Name="Delivery_ID" Type="bigint" />
+          <Property Name="UserEvaluator_ID" Type="bigint" />
+          <Property Name="UserInspector_ID" Type="bigint" />
+          <Property Name="NCR_ID" Type="bigint" />
+          <Property Name="UserReservedEvaluator_ID" Type="bigint" />
+          <Property Name="isRewrite" Type="bit" />
+        </EntityType>-->
+  <EntityContainer Name="PartsIQModelStoreContainer" />
+</Schema>
