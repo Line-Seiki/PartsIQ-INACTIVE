@@ -20,6 +20,7 @@ using Newtonsoft.Json.Linq;
 using System.Drawing.Drawing2D;
 using OfficeOpenXml.Style;
 using MySqlX.XDevAPI.Common;
+using Microsoft.IdentityModel.Tokens;
 
 namespace PartsMysql.Controllers
 {
@@ -787,34 +788,36 @@ namespace PartsMysql.Controllers
                 dynamic result = GetNonconformityFn(inspectionId,0);
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 string template = Server.MapPath("~/assets/excelFiles/Templates/PartsIq/NonConformity.xlsx");
-                if (string.IsNullOrEmpty(template))
+           
+                FileInfo templatefile = new FileInfo(template);
+                if (!templatefile.Exists)
                 {
                     return Json("Error, no template file is found", JsonRequestBehavior.AllowGet);
                 }
-                FileInfo templatefile = new FileInfo(template);
                 using (ExcelPackage package = new ExcelPackage(templatefile))
                 {
                     var worksheet = package.Workbook.Worksheets["sheet1"];
                     DateTime now = DateTime.Now;
-                    worksheet.Cells["T3"].Value = now.ToString("MMM dd, yyyy");            
+                    worksheet.Cells["U3"].Value = now.ToString("MMM dd, yyyy");
                     worksheet.Cells["F6"].Value = inspection.SupplierName;
                     worksheet.Cells["F7"].Value = inspection.SupplierInCharge;
-                    worksheet.Cells["N6"].Value = inspection.LotNumber;
-                    worksheet.Cells["T6"].Value = inspection.PartName;
+                    worksheet.Cells["O6"].Value = inspection.LotNumber;
+                    worksheet.Cells["U6"].Value = inspection.PartName;
                     worksheet.Cells["F8"].Value = inspection.DrNumber;
-                    worksheet.Cells["N8"].Value = inspection.LotQuantity;
-                    worksheet.Cells["T8"].Value = inspection.PartsCode;
+                    worksheet.Cells["O8"].Value = inspection.LotQuantity;
+                    worksheet.Cells["U8"].Value = inspection.PartsCode;
 
-                    worksheet.Cells["T1"].Value = controlNumber;
-                    worksheet.Cells["D38"].Value = remarks;
+                    worksheet.Cells["U1"].Value = controlNumber;
+                    worksheet.Cells["C36"].Value = remarks;
 
-                    var checkpointNg = result.Checkpoints;           
+                    var checkpointNg = result.Checkpoints;
                     var processor = new InspectionProcessor();
                     var measurementStats = processor.GetMinMaxOrigMeasurementPerCCode(checkpointNg);
                     var maxNgReject = processor.GetMaxNgPercentage(checkpointNg);
                     worksheet.Cells["F9"].Value = maxNgReject.QuantitySamples;
                     worksheet.Cells["K9"].Value = maxNgReject.NgRejectSamples;
-                    worksheet.Cells["P9"].Value = maxNgReject.RejectPercentage / 100 ;
+                    worksheet.Cells["Q9"].Value = maxNgReject.RejectPercentage / 100;
+                    worksheet.Cells["G43"].Value = now.AddDays(14).ToString("MMM dd, yyyy");
                     Debug.WriteLine($"Quantity Samples {maxNgReject.QuantitySamples} {maxNgReject.NgRejectSamples} {maxNgReject.RejectPercentage}");
                     var rowCount = 14;
 
@@ -828,38 +831,39 @@ namespace PartsMysql.Controllers
                         var cellK = worksheet.Cells["K" + rowCount];
                         cellK.Value = $"Max={stat.MaxOrigMeasurement}, Min={stat.MinOrigMeasurement}";
 
+                        worksheet.Cells["K" + rowCount].Value = $"Min={stat.MinOrigMeasurement}";
+                        worksheet.Cells["N" + rowCount].Value = $"Max={stat.MaxOrigMeasurement}";
                         // Check if the measurements are out of limits and style accordingly
-                        bool isOutOfLimits = stat.MinOrigMeasurement < stat.LowerLimit || stat.MaxOrigMeasurement > stat.UpperLimit;
-                        if (isOutOfLimits)
-                        {
-                            cellK.Style.Font.Color.SetColor(System.Drawing.Color.Red);
-                        }
+
                         if (stat.MaxOrigMeasurement > stat.UpperLimit)
                         {
-                            var comment = worksheet.Cells["K" + rowCount].AddComment($"Max value {stat.MaxOrigMeasurement} exceeds the upper limit {stat.UpperLimit}", "System");
-                            comment.Text = $"Max value {stat.MaxOrigMeasurement} exceeds the upper limit {stat.UpperLimit}";
-                            comment.AutoFit = true;
-                            worksheet.Cells["K" + rowCount].Style.Font.Color.SetColor(System.Drawing.Color.Red);
+                            worksheet.Cells["N" + rowCount].Style.Font.Color.SetColor(System.Drawing.Color.Red);
                         }
 
                         if (stat.MinOrigMeasurement < stat.LowerLimit)
                         {
-                            var comment = worksheet.Cells["K" + rowCount].AddComment($"Min value {stat.MinOrigMeasurement} is below the lower limit {stat.LowerLimit}", "System");
-                            comment.Text = $"Min value {stat.MinOrigMeasurement} is below the lower limit {stat.LowerLimit}";
-                            comment.AutoFit = true;
                             worksheet.Cells["K" + rowCount].Style.Font.Color.SetColor(System.Drawing.Color.Red);
                         }
                         rowCount++;  // Increment the rowCount to move to the next row for the next stat
                     }
-                 
-                
+
+            var view = worksheet.View;
+
+            // Clear any existing page breaks
+            view.PageBreakView = false;
+            worksheet.PrinterSettings.PaperSize = ePaperSize.A4;
+            worksheet.PrinterSettings.Orientation = eOrientation.Portrait;
 
 
+            byte[] fileContents;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                package.SaveAs(stream);
+                fileContents = stream.ToArray();
+            }
 
-                    MemoryStream stream = new MemoryStream();
-                    package.SaveAs(stream);
-                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "NonConformity.xlsx");
-                }
+            return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "NonConformity.xlsx");
+        }
 
 
 

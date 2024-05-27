@@ -1036,8 +1036,8 @@
                                                 <div class="d-flex justify-content-start">
                                                     <ul class="list-group">
                                                         <li class="d-flex"> <span class="fw-bolder"> Decision: </span>  <span class="fw-normal ms-1"> ${supplierName} </span> </li>
-                                                        <li class="d-flex"> <span class="fw-bolder"> Remarks: </span> <span class="fw-normal ms-1"><textarea class="form-control" name="nonconformityTextarea" id="nonconformityTextarea" rows="5"></textarea>  </span> </li>
-                                                        <li class="d-flex"> <span class="fw-bolder"> Control Number: </span> <span class="fw-normal ms-1"><input id="nonconformityControl" type="text" class="form-control" ></span> </li>
+                                                        <li class="d-flex"> <span class="fw-bolder"> Remarks: </span> <span class="fw-normal ms-1"><textarea class="form-control form-control-sm" name="nonconformityTextarea" id="nonconformityTextarea" rows="5"></textarea>  </span> </li>
+                                                        <li class="d-flex"> <span class="fw-bolder"> Control Number: </span> <span class="fw-normal ms-1"><input id="nonconformityControl" type="text" class="form-control form-control-sm" ></span> </li>
 
                                                      </ul>
                                                 </div>
@@ -1045,7 +1045,7 @@
                                                 </div>
                                                 <hr class="m-2"/>
                                                 <div class="d-flex justify-content-end">
-                                                    <button class="btn btn-sm btn-primary" type="submit" id="nonconformityExport"
+                                                    <button class="btn btn-sm btn-primary" type="submit" id="nonconformityExportBtn"
                                                       data-id="${inspectionId}"
                                                       data-supplierName="${supplierName}"
                                                       data-lotNumber="${lotNumber}"
@@ -1080,7 +1080,16 @@
             }
     });
 
-    $(document).on('click', '#nonconformityExport', function () {
+    $(document).on('click', '#nonconformityExportBtn', function () {
+        //Loading Btn
+        let id = $(this).attr('id');
+        var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary inspectionInfo" id="${id}" disabled>
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Loading...
+          </button>`);
+        var btn = $(this);
+
+        btn.replaceWith(loadingBtn);
 
     var supplierName = $(this).data('suppliername');
     var lotNumber = $(this).data('lotnumber');
@@ -1120,6 +1129,7 @@
             responseType: 'blob' // Set the response type to blob
         },
         success: function (response, status, xhr) {
+            loadingBtn.replaceWith(btn);
             console.log(response);
             if (status != 'success') {
                 alertify.error("Error occured!");
@@ -1137,7 +1147,9 @@
 
         },
         error: function (xhr, status, error) {
+            alertify.error(`Error ${error} occured. Contact Administrator`)
             console.error("Error occurred: ", status, error);
+            loadingBtn.replaceWith(btn);
         }
     });
 });
