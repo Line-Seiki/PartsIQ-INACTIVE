@@ -227,6 +227,22 @@ namespace PartsMysql.Controllers
             }
         }
 
+        public string FormatDate(string inputDate)
+        {
+            DateTime date;
+            if (DateTime.TryParseExact(inputDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
+            {
+                // Format the DateTime object to the desired string format "MM, dd, yyyy"
+                string formattedDate = date.ToString("MMM dd, yyyy");
+                return formattedDate; // Output: 06, 28, 2024
+            }
+            else
+            {
+                // Handle the case where the input date is not valid
+                return "Invalid date format";
+            }
+        }
+
 
 
         [HttpPost]
@@ -234,6 +250,7 @@ namespace PartsMysql.Controllers
         {
            try
         {
+            DateTime date;
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             string templatePath = Server.MapPath("~/assets/excelFiles/Templates/PartsIq/SupplierPerformance.xlsx");
             FileInfo templateFile = new FileInfo(templatePath);
@@ -246,17 +263,18 @@ namespace PartsMysql.Controllers
             var toDate = formData["toDate"] ?? "";
             var fromDate = formData["fromDate"] ?? "";
             var supplier = formData["supplier"] ?? "";
-
-
-                SupplierPerformanceGroup supplierPerformance = JsonConvert.DeserializeObject<SupplierPerformanceGroup>(jsonData);
-
-            using (ExcelPackage package = new ExcelPackage(templateFile))
+            SupplierPerformanceGroup supplierPerformance = JsonConvert.DeserializeObject<SupplierPerformanceGroup>(jsonData);
+                if (DateTime.TryParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
+                {
+                    // Format the DateTime object to the desired string format "MM, dd, yyyy"
+                    string formattedDate = date.ToString("MM, dd, yyyy");
+                    Console.WriteLine(formattedDate); // Output: 05, 28, 2024
+                }
+                using (ExcelPackage package = new ExcelPackage(templateFile))
             {
-                var worksheet = package.Workbook.Worksheets["sheet1"];
-               
-            
+                var worksheet = package.Workbook.Worksheets["sheet1"];                    
                 worksheet.Cells["C6"].Value = supplier;
-                worksheet.Cells["D7"].Value = $"{fromDate} to {toDate}";
+                worksheet.Cells["D7"].Value = $"{FormatDate(fromDate)} to {FormatDate(toDate)}";
                 worksheet.Cells["F9"].Value = accept;
                 worksheet.Cells["F10"].Value = sAccept;
                 worksheet.Cells["F11"].Value = sortOut;
@@ -264,7 +282,7 @@ namespace PartsMysql.Controllers
                 worksheet.Cells["F14"].Value = total;
             
                     // Write headers
-               
+              
                     int row = 16;
 
                     void WriteGroup(string decisionHeader, DecisionGroup group)
@@ -853,17 +871,11 @@ namespace PartsMysql.Controllers
             view.PageBreakView = false;
             worksheet.PrinterSettings.PaperSize = ePaperSize.A4;
             worksheet.PrinterSettings.Orientation = eOrientation.Portrait;
+           var excelBytes = package.GetAsByteArray();
+           return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "chart.xlsx");
 
 
-            byte[] fileContents;
-            using (MemoryStream stream = new MemoryStream())
-            {
-                package.SaveAs(stream);
-                fileContents = stream.ToArray();
-            }
-
-            return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "NonConformity.xlsx");
-        }
+                }
 
 
 
