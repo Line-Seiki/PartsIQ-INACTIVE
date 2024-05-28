@@ -653,7 +653,8 @@
                                             data-partName="${row.PartName}"
                                             data-drNumber="${row.DrNumber}"
                                             data-supplierincharge="${row.SupplierInCharge}"
-                                            data-lotQuantity="${row.LotQuantity}">
+                                            data-lotQuantity="${row.LotQuantity}"
+                                            data-decision="${row.Decision}">
                                             Nonconformity Report
                                         </button>
                                     `;
@@ -664,7 +665,7 @@
                         data: reportSummaryJson,
                         order: [[4, 'desc']],
                         rowId: "InspectionId",
-                        scrollX: true,
+                        
                         scrollY: '300px',
                         responsive: true,
                         searching: false,
@@ -830,14 +831,10 @@
      </ul>
     </div>
 </div>
+    </div>
+</div> `;
 
-                                         </div>
-                                     </div>
-
-
-                                     `;
-
-                                    partInfoTabContent.append(htmlTabContent);
+                partInfoTabContent.append(htmlTabContent);
                                 }
 
                                 var href = `#partInformation`;
@@ -901,7 +898,7 @@
                     });
 
                     $('#reportSummary tbody').on('click', '.nonconformityBtn', function () {
-                       
+                        var decision = $(this).data('decision');
                         var supplierName = $(this).data('suppliername');
                         var supplierInCharge = $(this).data('supplierincharge') ;
                         var lotNumber = $(this).data('lotnumber');
@@ -1005,7 +1002,7 @@
                                                 </ul>
                                         </div>
                                         <div class="table-container">
-                                        <table class="table table-bordered table-hover fs-12 ">
+                                        <table class="table table-bordered table-hover fs-12">
                                               <thead class="text-center">
                                                 <tr>
                                                   <th scope="col">Test Item</th>
@@ -1035,7 +1032,7 @@
                                                 <div class="col-md-12">
                                                 <div class="d-flex justify-content-start">
                                                     <ul class="list-group">
-                                                        <li class="d-flex"> <span class="fw-bolder"> Decision: </span>  <span class="fw-normal ms-1"> ${supplierName} </span> </li>
+                                                        <li class="d-flex"> <span class="fw-bolder"> Decision: </span>  <span class="fw-normal ms-1"> ${decision} </span> </li>
                                                         <li class="d-flex"> <span class="fw-bolder"> Remarks: </span> <span class="fw-normal ms-1"><textarea class="form-control form-control-sm" name="nonconformityTextarea" id="nonconformityTextarea" rows="5"></textarea>  </span> </li>
                                                         <li class="d-flex"> <span class="fw-bolder"> Control Number: </span> <span class="fw-normal ms-1"><input id="nonconformityControl" type="text" class="form-control form-control-sm" ></span> </li>
 
@@ -1054,7 +1051,8 @@
                                                       data-drNumber="${drNumber}"
                                                       data-lotQuantity="${lotQuantity}"
                                                       data-supplierInCharge = "${supplierInCharge}"
-                                                      ">
+                                                      data-decision = "${decision}"
+                                                      >
                                                     <i class="fas fa-file-excel"  style="cursor: pointer;"></i> Export</button>
                                                     </div>
                                 `;
@@ -1091,6 +1089,7 @@
 
         btn.replaceWith(loadingBtn);
 
+    var decision = $(this).data('decision');
     var supplierName = $(this).data('suppliername');
     var lotNumber = $(this).data('lotnumber');
     var partCode = $(this).data('partcode');
@@ -1112,6 +1111,7 @@
             };
 
 
+  
 
     var formData = new FormData();
             formData.append("formData", JSON.stringify(objTemp));
@@ -1147,8 +1147,17 @@
 
         },
         error: function (xhr, status, error) {
-            alertify.error(`Error ${error} occured. Contact Administrator`)
-            console.error("Error occurred: ", status, error);
+          
+            if (decision == "Accept" || decision == "Pending") {
+
+                alertify.warning("There is no rejects");
+              
+            }
+            else {
+                alertify.error(`Error ${error} occured. Contact Administrator`)
+                console.error("Error occurred: ", status, error);
+           }
+            
             loadingBtn.replaceWith(btn);
         }
     });
@@ -1175,11 +1184,7 @@
             });
 
 
-            let cols = $('#mainContent').find('.sub-content');
-            console.log(cols)
-            cols.each(function (index) {
-            $(this).removeClass('col-md-12').addClass('col-md-6');
-            });
+        
             let html = '';
             let htmlTabContent = '';
 
@@ -1193,7 +1198,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <a href="#TabSupplierPerformance" id="supplierPerformance-tab" data-bs-toggle="tab" role="tab" aria-expanded="false" class="nav-link">Supplier Performance
                                 </a>
-                                <i class="mdi mdi-close-thick closeTabPane" data-id="#Tab25271" style="cursor: pointer;"></i>
+                                <i class="mdi mdi-close-thick closeTabPane" data-id="#TabSupplierPerformance" style="cursor: pointer;"></i>
                                 </li>
                             </div> `;
 
@@ -1202,7 +1207,7 @@
                                         <div class="card">
                                             <div class="card-header d-flex justify-content-between align-items-center">
                                                 <h5 class="card-title">Supplier Performance</h5>
-                                                <i class="mdi mdi-close-thick" id="closeSupplier" style="cursor: pointer;"></i>
+                                              
                                             </div>
                                             <div class="card-body">
                                                 <form id="supplierPerformanceForm">
@@ -1272,7 +1277,7 @@
 
                                                         </div>
                                                         <div class="col-sm-12 col-xl-12 m-2 text-center">
-                                                            <button type="button" class="btn btn-primary btn-sm" id="supplierPerformanceBtn">
+                                                            <button type="button" class="btn btn-primary btn-sm" id="supplierPerformanceBtn" disabled>
                                                                 Download
                                                             </button>
                                                         </div>
@@ -1414,7 +1419,9 @@
             });
         });
 
-    $(document).on('submit', '#supplierPerformanceForm',function (event) {
+        $(document).on('submit', '#supplierPerformanceForm', function (event) {
+
+            $('#supplierPerformanceBtn').prop("disabled", true);
                 var btn = $('#supplierPerformanceSearch');
                 var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary"  id="#supplierPerformanceSearch" disabled>
                                         <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
@@ -1441,6 +1448,7 @@
                 processData: false,
                 data: formData,
                 success: function (response) {
+                    $('#supplierPerformanceBtn').prop("disabled", false);
                 loadingBtn.replaceWith(btn);
                     function parseDate(rawDate) {
                         var date = new Date(parseInt(rawDate.substr(6))); // Convert Unix timestamp to milliseconds
@@ -1529,27 +1537,37 @@
                                 break;
                         }
                     });
-                    supplierObj.total = total;
-                    supplierObj.accept = ((totalAccept / total) * 100).toFixed(2);
-                    supplierObj.sAccept = ((specialAccept / total) * 100).toFixed(2);
-                    supplierObj.sortOut = ((sortOut / total) * 100).toFixed(2);
-                    supplierObj.reject = ((reject / total) * 100).toFixed(2);
+                    if (total <= 0) {
+                        supplierObj.total = 0;
+                        supplierObj.accept = 0;
+                        supplierObj.sAccept = 0;
+                        supplierObj.sortOut = 0;
+                        supplierObj.reject = 0;
+
+                    } else {
+                        supplierObj.total = total;
+                        supplierObj.accept = ((totalAccept / total) * 100).toFixed(2);
+                        supplierObj.sAccept = ((specialAccept / total) * 100).toFixed(2);
+                        supplierObj.sortOut = ((sortOut / total) * 100).toFixed(2);
+                        supplierObj.reject = ((reject / total) * 100).toFixed(2);
+                    }
+ 
 
                     let htmlS = '';
 
                     htmlS += `
                         <ul class="list-unstyled fw-bolder fs-12 text-center">
                             <li>
-                            % of Accept Inspection : ${((totalAccept  / total) * 100).toFixed(2)}%
+                            % of Accept Inspection : ${supplierObj.accept}%
                             </li>
                             <li>
-                            % of Special Accept Inspection : ${((specialAccept / total) * 100).toFixed(2)}%
+                            % of Special Accept Inspection : ${supplierObj.sAccept}%
                             </li>
                             <li>
-                            % of Sort Out Inspection : ${((sortOut / total) * 100).toFixed(2)}%
+                            % of Sort Out Inspection : ${supplierObj.sortOut}%
                             </li>
                             <li>
-                            % of RejectInspection : ${((reject / total) * 100).toFixed(2)}%
+                            % of RejectInspection : ${supplierObj.reject}%
                             </li>
                         </ul>
                         <h5 class="fw-bolder">Total Number of Inspections: ${(total)}</h5>
@@ -1557,6 +1575,7 @@
                     supplier.html(htmlS);
                 },
                 error: function (response) {
+                    $('#supplierPerformanceBtn').prop('disabled', false);
                     alert('Please make sure Supplier is not Null')
                 }
             });
@@ -1611,7 +1630,9 @@
                     $(document).find(`#Tab${inspectionId} .lowerLimitSpan`).text(lowerLimit);
                     $(document).find(`#Tab${inspectionId} .upperLimitSpan`).text(upperLimit);
                     let html = '';
-                    html += ` <table class="table table-responsive fs-12 checkpointTableTbl">
+                    html += `
+                    <div class="table-container">
+                    <table class="table fs-12">
                                                             <thead>
                                                             <tr>
                                                             <th>Sample Number</th>
@@ -1640,7 +1661,7 @@
                         <td class= ${textColor}> ${checkpoint.IsGood? "Good" : "Not Good"} </td>
                         </tr>` ;
                     });
-                    html += '</tbody> </table>';
+                    html += '</tbody> </table> </div>';
                     let x = $(document).find(`#Tab${inspectionId} .checkpointTable`);
 
 
@@ -2818,8 +2839,11 @@
                                 }
                             }
                         }
-                    }
-
+        }
+        if (lotNumber.length > 0) {
+            partPerformanceObj.partName = lotNumber[0].PartName;
+        }
+       
 
                    $('#partPerformanceTable').bootstrapTable('destroy');
                    if (!$('#partPerformanceTable').hasClass('bootstrap-table')) {
@@ -2876,9 +2900,8 @@
                        // Refresh the data if the table has already been initialized
                        $('#partPerformanceTable').bootstrapTable('load', lotNumber);
                    }
-        console.log(lotNumber[0]);
 
-        partPerformanceObj.partName = lotNumber[0].PartName;
+   
 
             loadingBtn.replaceWith(btn);
                });
@@ -2890,30 +2913,34 @@
                    $('#cavityNumberPa').empty();
                    let supplier = suppliers.filter(supplier => supplier.SupplierId == supplierId);
 
-                   if (supplier) {
-                       $('#cavityNumberPa').append('<option value="null" selected>All</option>');
-                       supplier.forEach(cavity => {
-                           // Check if cavity.DateFinished is not null
-                           if (cavity.DateFinished !== null) {
-                               // Parse the cavity.DateFinished to compare with fromDate and toDate
-                               var parsedDate = parseDate(cavity.DateFinished);
-                               // Check if the parsed date is within the fromDate and toDate range
-                               if (parsedDate >= fromDate && parsedDate <= toDate) {
-                                   // Check if an option with the same text already exists
-                                   if ($('#cavityNumberPa option').filter(function () {
-                                       return $(this).text() === cavity.CavityNumber;
-                                   }).length === 0 && cavity.CavityNumber !== null) {
-                                       $('#cavityNumberPa').append($('<option>', {
-                                           text: cavity.CavityNumber,
-                                           value: cavity.CavityId,
-                                           'data-supplierid': cavity.SupplierId
-                                       }));
-                                   }
-                               }
-                           }
-                       });
+        if (supplier.length > 0) {
+            $('#partPerformanceBtn').prop("disabled", false);
+            $('#cavityNumberPa').append('<option value="null" selected>All</option>');
+            supplier.forEach(cavity => {
+                // Check if cavity.DateFinished is not null
+                if (cavity.DateFinished !== null) {
+                    // Parse the cavity.DateFinished to compare with fromDate and toDate
+                    var parsedDate = parseDate(cavity.DateFinished);
+                    // Check if the parsed date is within the fromDate and toDate range
+                    if (parsedDate >= fromDate && parsedDate <= toDate) {
+                        // Check if an option with the same text already exists
+                        if ($('#cavityNumberPa option').filter(function () {
+                            return $(this).text() === cavity.CavityNumber;
+                        }).length === 0 && cavity.CavityNumber !== null) {
+                            $('#cavityNumberPa').append($('<option>', {
+                                text: cavity.CavityNumber,
+                                value: cavity.CavityId,
+                                'data-supplierid': cavity.SupplierId
+                            }));
+                        }
+                    }
+                }
+            });
 
-                   }
+        }
+        else {
+            $('#partPerformanceBtn').prop("disabled", true);
+        }
 
                });
 

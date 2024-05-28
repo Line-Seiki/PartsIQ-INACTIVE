@@ -827,7 +827,7 @@ namespace PartsMysql.Controllers
                         Debug.WriteLine($"CCode: {stat.CCode}, MinOrigMeasurement: {stat.MinOrigMeasurement}, MaxOrigMeasurement: {stat.MaxOrigMeasurement}, Specification: {stat.Specification}");
 
                         worksheet.Cells["B" + rowCount].Value = stat.CCode;
-                        worksheet.Cells["E" + rowCount].Value = stat.Specification;
+                        worksheet.Cells["E" + rowCount].Value = FormatSpecification(stat.Specification);
                         var cellK = worksheet.Cells["K" + rowCount];
                         cellK.Value = $"Max={stat.MaxOrigMeasurement}, Min={stat.MinOrigMeasurement}";
 

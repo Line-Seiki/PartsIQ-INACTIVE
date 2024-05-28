@@ -29,7 +29,7 @@ namespace PartsMysql.DataAccess
 
             // Query the SQL view using raw SQL
             return this.Database.SqlQuery<InspectionSummary>(
-                "SELECT TOP (100)[InspectionId], [Decision], [Evaluator], [Inspector], [ControlNumber], [DateFinished], " +
+                "SELECT TOP (1000)[InspectionId], [Decision], [Evaluator], [Inspector], [ControlNumber], [DateFinished], " +
                 "[PartCode], [PartName], [LotNumber], [LotQuantity], [DrNumber], [Time], [Comments], [InspectorComments], " +
                 "[NcrId], [SupplierId], [SupplierName], [SupplierInCharge]" +
                 "FROM [PartsIQ].[dbo].[InspectionSummaryView] " +
@@ -121,7 +121,7 @@ namespace PartsMysql.DataAccess
         public List<InspectionSummary> InspectionSummaryFilter(string PartsCode, string LotNumber, DateTime DateFrom, DateTime DateTo, string DrNumber, int SupplierId)
         {
 
-            string sqlQuery = "SELECT TOP (50)[InspectionId], [Decision], [Evaluator], [Inspector], [ControlNumber], [DateFinished], " +
+            string sqlQuery = "SELECT TOP (1000)[InspectionId], [Decision], [Evaluator], [Inspector], [ControlNumber], [DateFinished], " +
                 "[PartCode], [PartName], [LotNumber], [LotQuantity], [DrNumber], [Time], [Comments], [InspectorComments], " +
                 "[NcrId], [SupplierId], [SupplierName]" +
                 "FROM [PartsIQ].[dbo].[InspectionSummaryView] " +

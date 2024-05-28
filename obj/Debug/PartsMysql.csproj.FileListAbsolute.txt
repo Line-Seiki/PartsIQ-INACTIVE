@@ -177,3 +177,7 @@ C:\Users\Dan\source\repos\PartsMysql\bin\Microsoft.IO.RecyclableMemoryStream.dll
 C:\Users\Dan\source\repos\PartsMysql\bin\System.ComponentModel.Annotations.dll
 C:\Users\Dan\source\repos\PartsMysql\bin\EPPlus.xml
 C:\Users\Dan\source\repos\PartsMysql\bin\Microsoft.IO.RecyclableMemoryStream.xml
+C:\Users\Dan\source\repos\PartsIq\obj\Debug\PartsMysql.csproj.AssemblyReference.cache
+C:\Users\Dan\source\repos\PartsIq\obj\Debug\PartsMysql.csproj.CoreCompileInputs.cache
+C:\Users\Dan\source\repos\PartsIq\obj\Debug\PartsMysql.dll
+C:\Users\Dan\source\repos\PartsIq\obj\Debug\PartsMysql.pdb
