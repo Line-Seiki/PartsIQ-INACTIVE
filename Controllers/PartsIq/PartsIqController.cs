@@ -824,10 +824,8 @@ namespace PartsMysql.Controllers
                     worksheet.Cells["F8"].Value = inspection.DrNumber;
                     worksheet.Cells["O8"].Value = inspection.LotQuantity;
                     worksheet.Cells["U8"].Value = inspection.PartsCode;
-
                     worksheet.Cells["U1"].Value = controlNumber;
                     worksheet.Cells["C36"].Value = remarks;
-
                     var checkpointNg = result.Checkpoints;
                     var processor = new InspectionProcessor();
                     var measurementStats = processor.GetMinMaxOrigMeasurementPerCCode(checkpointNg);
@@ -839,11 +837,9 @@ namespace PartsMysql.Controllers
                     Debug.WriteLine($"Quantity Samples {maxNgReject.QuantitySamples} {maxNgReject.NgRejectSamples} {maxNgReject.RejectPercentage}");
                     var rowCount = 14;
 
-
                     foreach (var stat in measurementStats)
                     {
                         Debug.WriteLine($"CCode: {stat.CCode}, MinOrigMeasurement: {stat.MinOrigMeasurement}, MaxOrigMeasurement: {stat.MaxOrigMeasurement}, Specification: {stat.Specification}");
-
                         worksheet.Cells["B" + rowCount].Value = stat.CCode;
                         worksheet.Cells["E" + rowCount].Value = FormatSpecification(stat.Specification);
                         var cellK = worksheet.Cells["K" + rowCount];
@@ -864,21 +860,14 @@ namespace PartsMysql.Controllers
                         }
                         rowCount++;  // Increment the rowCount to move to the next row for the next stat
                     }
-
             var view = worksheet.View;
-
             // Clear any existing page breaks
             view.PageBreakView = false;
             worksheet.PrinterSettings.PaperSize = ePaperSize.A4;
             worksheet.PrinterSettings.Orientation = eOrientation.Portrait;
            var excelBytes = package.GetAsByteArray();
            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "chart.xlsx");
-
-
                 }
-
-
-
             } 
             catch (Exception ex) 
                 {
@@ -886,76 +875,26 @@ namespace PartsMysql.Controllers
             }
         }
 
-        // GET: PartsIq/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
 
-        // GET: PartsIq/Create
-        public ActionResult Create()
+        public ActionResult GetInspectionStatistics(FormCollection formData)
         {
-            return View();
-        }
-
-        // POST: PartsIq/Create
-        [HttpPost]
-        public ActionResult Create(FormCollection collection)
-        {
-            try
+            using (var dbContext = new PartsIQEntities())
             {
-                // TODO: Add insert logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
+                var res = dbContext.GetInspectionStatistics();
+                return Json(res, JsonRequestBehavior.AllowGet);
             }
         }
 
-        // GET: PartsIq/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
 
-        // POST: PartsIq/Edit/5
-        [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
+    
 
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
+    
 
-        // GET: PartsIq/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+     
 
-        // POST: PartsIq/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
 
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
+   
+
+
     }
 }

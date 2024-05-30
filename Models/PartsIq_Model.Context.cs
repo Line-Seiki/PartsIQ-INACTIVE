@@ -24,7 +24,12 @@ namespace PartsMysql.Models
         {
             throw new UnintentionalCodeFirstException();
         }
-    
+
+        internal object GetInspectionStatistics()
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<MSreplication_options> MSreplication_options { get; set; }
         public virtual DbSet<spt_fallback_db> spt_fallback_db { get; set; }
