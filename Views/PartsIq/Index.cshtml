@@ -199,6 +199,7 @@
                                 </div>
                                 <div class="col-md-12 text-center mb-2">
                                     <button id="partPerformanceBtn" type="button" class="btn btn-primary btn-sm" disabled>Search</button>
+
                                 </div>
                             </div>
                         </form>
@@ -380,12 +381,12 @@
                                                 <input type="date" id="fromDateIs" name="fromDateIs" class="form-control form-control-sm fromDate" required>
                                             </div>
                                             <div class="form-group floating-label enable-floating-label show-label">
-                                                <label for="partsCodePa" class=" fw-bolder">Parts Code</label>
-                                                <select type="text" id="partsCodePa" name="partsCodePa" class="form-control  form-control-sm partsCodeSelect" required> </select>
+                                                <label for="partsCodeIs" class=" fw-bolder">Parts Code</label>
+                                                <select type="text" id="partsCodeIs" name="partsCodeIs" class="form-control  form-control-sm partsCodeSelect" required> </select>
                                             </div>
                                             <div class="form-group floating-label enable-floating-label show-label">
-                                                <label for="supplierPa" class="fw-bolder">Inspector</label>
-                                                <select type="text" id="supplierPa" name="supplierPa" class="form-control form-control-sm">
+                                                <label for="inspectorIs" class="fw-bolder">Inspector</label>
+                                                <select type="text" id="inspectorIs" name="inspectorIs" class="form-control form-control-sm">
                                                 </select>
                                             </div>
                                         </div>
@@ -395,18 +396,22 @@
                                                 <input type="date" id="toDateIs" name="toDateIs" class="form-control form-control-sm toDate" required>
                                             </div>
                                             <div class="form-group floating-label enable-floating-label show-label">
-                                                <label for="cavityNumberPa" class="fw-bolder">Part Name</label>
-                                                <select type="text" id="cavityNumberPa" name="cavityNumberPa" class="form-control form-control-sm">
-                                                    <option value="null">All</option>
-                                                </select>
+                                                <label for="partNameIs" class="fw-bolder">Part Name</label>
+                                                <input type="text" id="partNameIs" class="form-control form-control-sm" readonly>                                               
+                                             
                                             </div>
                                             <div class="form-group floating-label enable-floating-label show-label">
-                                                <label for="checkpointPa" class="fw-bolder">Show All</label>
-                                                <select type="text" id="checkpointPa" name="checkpointPa" class="form-control form-control-sm"></select>
+                                                <label for="minMaxIs" class="fw-bolder">Show All</label>
+                                                <select type="text" id="minMaxIs" name="minMaxIs" class="form-control form-control-sm">
+                                                    <option value="all">All</option>
+                                                    <option value="min">Min</option>
+                                                    <option value="max">Max</option>
+                                                </select>
+                                               
                                             </div>
                                         </div>
                                         <div class="col-md-12 text-center mb-2">
-                                            <button id="partPerformanceBtn" type="button" class="btn btn-primary btn-sm" disabled>Search</button>
+                                            <button type="submit" class="btn btn-primary btn-sm" >Search</button>
                                         </div>
                                     </div>
                                 </form>
@@ -447,7 +452,7 @@
           var mrChart = null;
           var rChart = null;
           var supplierObj;
-
+          var inspectionStat;
           //Function Call for Inspection Summary
           getInspectionSummary();
           getSuppliers();
@@ -499,7 +504,7 @@
               else {
                   return null;
               }
- 
+
     }
           function parseDateStrTime(rawDate) {
               if (rawDate != null) {
@@ -1045,6 +1050,19 @@
         });
     }
 
+    async function getUsers() {
+        try {
+            let users = await $.ajax({
+                url: '@Url.Action("GetUsers", "PartsIq")',
+                type: "GET"
+            });
+            return users;
+        } catch (error) {
+            alertify.error("Error occurred in fetching inspectors");
+            return [];
+        }
+    }
+
     function nonConformity() {
                 var decision = $(this).data('decision');
                 var supplierName = $(this).data('suppliername');
@@ -1205,12 +1223,12 @@
 
           }
 
-    function inspectionStatistics() {
+    async function inspectionStatistics() {
         try {
-            var inspectionStat;
+         
             $.ajax({
                 async: true,
-                url: '@Url.Action("GetInspectionStatistics", "PartsIq")',
+                url: '@Url.Action("GetInspectionStatisticsFn", "PartsIq")',
                 method: "GET",
                 success: function (response) {
                     if (response) {
@@ -1230,7 +1248,7 @@
                                     render: function (data) {
                                         return parseDateStr(data)
                                     }
-                                   
+
                                 },
                                 { data: "DrNumber" },
                                 { data: "PartCode" },
@@ -1240,39 +1258,39 @@
                                     data: "InspectionStart",
                                     type: "date",
                                     render: function (data) {
-                                        return parseDateStrTime(data)                                   
+                                        return parseDateStrTime(data)
                                     }
-                                   
+
                                 },
                                 {
                                     data: "InspectionEnd",
                                     type: "date",
-                                    render: function (data) {                               
-                                        return parseDateStrTime(data) 
+                                    render: function (data) {
+                                        return parseDateStrTime(data)
                                     }
-                                   
+
                                 },
                                 {
                                     data: "InspectionDuration",
                                     render: function (data) {
                                         return parseTime(data)
                                     }
-                                   
-                                  
+
+
                                 },
                                 {
                                     data: "EvaluationDuration",
                                     render: function (data, type, row) {
                                         return parseTime(data - row.InspectionDuration)
                                     }
-                                   
+
                                 },
                                 { data: "Inspector" },
 
                             ],
                             data: response,
                             searching: false,
-                         
+
                             rowId: "InspectionId",
                             scrollY: '300px',
                             responsive: true,
@@ -1295,16 +1313,30 @@
                             },
                         });
                         inspectionStat.buttons().container().appendTo("#inspectionStatsTbl_wrapper .col-md-6:eq(0)");
-                       
+
                     }
+
                 },
                 error: function (err) {
                     alertify.error("Error occured. Contact administrator");
                 }
 
             })
+
+            //For Inspector Code
+            let users = await getUsers();     
+            let inspectors = users.filter(user => user.UserRole === "Inspector");
+            let inspectorSelect = $('#inspectorIs');
+            let html = '<option value="null">All</option>';
+            inspectors.forEach((inspector) => {
+                console.log(inspector);
+                if (inspector.UserName) {
+                    html += `<option value="${inspector.UserName}">${inspector.UserName}</option>`;
+                }
+            });
+            inspectorSelect.html(html);
         } catch (error) {
-            alertify.error("Erro occured. Contract administrator")
+            alertify.error(`Error ${error} occured. Contract administrator`);
         }
     }
 
@@ -1317,6 +1349,30 @@
         exportInspectionResult.call(this);
     });
 
+    $('#inspectionStatsForm').on('submit', function (event) {
+        event.preventDefault();
+        var formData = new FormData(this); // Directly pass the form element to FormData
+
+        $.ajax({
+            url: '@Url.Action("GetInspectionStatisticsFn", "PartsIq")',
+            contentType: false,
+            processData: false,
+            data: formData,
+            method: "POST",
+            success: function (response) {
+                if (response && Array.isArray(response)) {
+                    inspectionStat.clear().rows.add(response).draw();
+                    window.location.href = `#inspectionStatsTbl`;
+                }
+                else {
+                    alertify.error(`Error occured. Contact administrator`);
+                }
+            },
+            error: function (error) {
+                alertify.error(`Error ${error}occured. Contact administrator`);
+            }
+        });
+    });
     $('#inspectionStatBtn').on('click', function () {
         inspectionStatistics.call(this);
     });
@@ -1698,7 +1754,7 @@
                 success: function (response) {
                     $('#supplierPerformanceBtn').prop("disabled", false);
                 loadingBtn.replaceWith(btn);
-        
+
 
                     supplierObj = response;
 
@@ -2104,7 +2160,7 @@
                 return { min: yMin, max: yMax };
             }
 
-          
+
         const selections = $('#partPerformanceTable').bootstrapTable('getSelections');
 
         if (selections.length <= 0) {
@@ -2365,7 +2421,7 @@
 
           $(document).on('click', '#plotXChart', async function () {
 
-            
+
               function consolidateDataByLot(data) {
                   const consolidatedData = {};
 
@@ -3059,7 +3115,7 @@
             for (const item of suppliers) {
                 if (item.DateFinished != null) {
                     let dateFinished = parseDateNum(item.DateFinished);
-                    if (dateFinished >= fromDate 
+                    if (dateFinished >= fromDate
                         && dateFinished <= toDate) {
                         if (!uniqueIds[item.InspectionId]) {
                             uniqueIds[item.InspectionId] = true;

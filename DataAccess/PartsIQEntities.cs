@@ -9,6 +9,11 @@ using MySql.Data.EntityFramework;
 using PartsMysql.Models;
 using System.Data.SqlClient;
 using Org.BouncyCastle.Asn1.X509;
+using System.Diagnostics;
+using System.Web.Helpers;
+using System.Text;
+using System.Data.Entity.Infrastructure;
+using System.Collections;
 
 namespace PartsMysql.DataAccess
 {
@@ -187,5 +192,70 @@ namespace PartsMysql.DataAccess
             }
         }
 
+        public List<InspectionStatistics> GetInspectionStatistics(DateTime? fromDateIs = null, DateTime? toDateIs = null, string inspectorIs = null, string minMaxIs = null, long? partsCodeIs = null)
+        {
+            try
+            {
+                Debug.WriteLine(inspectorIs);
+                // Initialize the base query
+                var sqlQuery =
+        "SELECT TOP(500) InspectionId, DateDelivered, ControlNumber, DateFinished, LotNumber, LotQuantity, SampleSize, InspectionDuration, EvaluationDuration, InspectionStart, InspectionEnd, Comments, InspectorComments, " +
+        "Decision, DrNumber, NcrId, Evaluator, Inspector, PartName, PartCode, PartId, SupplierId, SupplierName, SupplierInCharge " +
+        "FROM [PartsIQ].[dbo].[InspectionStatisticsView] " +
+        "WHERE (@fromDateIs IS NULL OR InspectionStart >= @fromDateIs) " +
+        "AND (@toDateIs IS NULL OR InspectionEnd <= @toDateIs) ";
+
+                List<SqlParameter> parameters = new List<SqlParameter> {
+        new SqlParameter("@fromDateIs", fromDateIs),
+        new SqlParameter("@toDateIs", toDateIs)
+    };
+
+                if (inspectorIs != null && inspectorIs != "null")
+
+                {
+                    Debug.WriteLine($"{inspectorIs} is not supported.");
+                    sqlQuery += " AND Inspector = @Inspector";
+                parameters.Add(new SqlParameter("@Inspector", inspectorIs));
+
+            }
+                if (partsCodeIs !=null && partsCodeIs >= 0)
+                {
+                    sqlQuery += " AND PartId = @PartId";
+                    parameters.Add(new SqlParameter("@PartId", partsCodeIs));
+                }
+                sqlQuery += " ORDER BY [DateDelivered] DESC";
+                Debug.WriteLine(sqlQuery);
+                return this.Database.SqlQuery<InspectionStatistics>(sqlQuery, parameters.ToArray()).ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{ex.Message} Error");
+                return new List<InspectionStatistics>();
+            }
+        }
+
+        public List <User> GetUsers()
+        {
+            try
+            {
+                var query = @"
+                SELECT TOP (1000)
+                    [UserId],
+                    [UserEmail],
+                    [UserName],
+                    [UserUsername],
+                    [UserPassword],
+                    [IsActive],
+                    [UserRole]
+                FROM [PartsIQ].[dbo].[UserPermissionView] Where IsActive != 0";
+
+                // Execute the query and return the results
+                return this.Database.SqlQuery<User>(query).ToList();
+            }
+            catch (Exception ex){
+                Debug.WriteLine(ex.Message);
+                return new List<User>();
+            }
+        }
     }
 }

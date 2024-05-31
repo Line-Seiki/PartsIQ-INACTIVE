@@ -7,6 +7,7 @@ namespace PartsMysql.Models
 {
     public class InspectionStatistics : InspectionSummary
     {
+    public long? PartId { get; set; }
     public DateTime DateDelivered { get; set; }
     public DateTime? InspectionStart { get; set; }
     public DateTime? InspectionEnd { get; set; }

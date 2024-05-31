@@ -84,6 +84,17 @@ namespace PartsMysql.Controllers
             }
 
         }
+
+        public ActionResult GetUsers()
+        {
+            using (var dbContext  = new PartsIQEntities())
+            {
+                var users = dbContext.GetUsers();
+                return Json(users, JsonRequestBehavior.AllowGet);
+            }
+            
+        }
+
         //POST: Get Supplier Performance
         [HttpPost]
         public ActionResult SupplierPerformance(FormCollection formData)
@@ -874,26 +885,82 @@ namespace PartsMysql.Controllers
                 return new HttpStatusCodeResult(500, ex.Message);
             }
         }
-
-
-        public ActionResult GetInspectionStatistics(FormCollection formData)
+        //public ActionResult GetInspectionStatisticsFn()
+        //{
+        //    using (var dbContext = new PartsIQEntities())
+        //    {
+        //        var res = dbContext.GetInspectionStatistics();
+        //        return Json(res, JsonRequestBehavior.AllowGet);
+        //    }
+        //}
+ 
+        public ActionResult GetInspectionStatisticsFn(FormCollection formData = null)
         {
-            using (var dbContext = new PartsIQEntities())
+            try
             {
-                var res = dbContext.GetInspectionStatistics();
-                return Json(res, JsonRequestBehavior.AllowGet);
+                DateTime startDate = DateTime.Now.AddYears(-1);
+                DateTime endDate = DateTime.Now;
+                DateTime? fromDateIs = startDate;
+                DateTime? toDateIs = endDate;
+                long? partsCodeIs = null;
+                string minMaxIs = null;
+                string inspectorIs = null;
+               
+                if (formData != null)
+                {
+                    if (!string.IsNullOrEmpty(formData["fromDateIs"]) && formData["fromDateIs"] != "null" && DateTime.TryParse(formData["fromDateIs"], out DateTime parsedFromDate))
+                    {
+                        fromDateIs = parsedFromDate;
+                    }
+
+                    // Handle toDateIs
+                    if (!string.IsNullOrEmpty(formData["toDateIs"]) && formData["toDateIs"] != "null" && DateTime.TryParse(formData["toDateIs"], out DateTime parsedToDate))
+                    {
+                        toDateIs = parsedToDate;
+                    }
+
+
+                    if (!string.IsNullOrEmpty(formData["inspectorIs"]) && formData["inspectorIs"] != "null")
+                    {
+                        inspectorIs = formData["inspectorIs"];
+                    }
+
+
+                    // Handle partsCodeIs
+
+                    if (!string.IsNullOrEmpty(formData["partsCodeIs"]) && formData["partsCodeIs"] != "null" && long.TryParse(formData["partsCodeIs"], out long parsedPartsCode))
+                    {
+                        partsCodeIs = parsedPartsCode;
+                    }
+                  
+
+                    minMaxIs = formData["minMaxIs"];
+                    inspectorIs = formData["inspectorIs"];
+                }
+
+
+                using (var dbContext = new PartsIQEntities())
+                {
+                    var res = dbContext.GetInspectionStatistics(fromDateIs, toDateIs, inspectorIs, minMaxIs, partsCodeIs);
+
+                    return Json(res, JsonRequestBehavior.AllowGet);
+                }
             }
+            catch (Exception ex)
+            {
+                return Json("error" + ex.Message, JsonRequestBehavior.AllowGet);
+            }
+
+            
         }
 
 
-    
-
-    
-
-     
 
 
-   
+
+
+
+
 
 
     }
