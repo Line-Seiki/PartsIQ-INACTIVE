@@ -1,0 +1,20 @@
+# Ignore all .log files
+*.log
+
+# Ignore node_modules directory
+App_Data/
+App_Start/
+Migrations/
+packages/
+Properties/
+.vs/
+
+#Ignore Temp Files
+assets/excelFiles/Templates/PartsIq/~$*
+
+
+# Ignore all files in the /build directory
+/build
+
+# Ignore a specific file
+secret.txt

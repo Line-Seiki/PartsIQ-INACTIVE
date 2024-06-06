@@ -1,0 +1,3898 @@
+﻿@model IEnumerable<PartsMysql.Models.InspectionDetailsViewModel>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+@*<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.4/dist/bootstrap-table.min.css">
+    <script src="https://unpkg.com/bootstrap-table@1.22.4/dist/bootstrap-table.min.js"></script>*@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.css">
+<style>
+    .custom-label {
+        font-size: 12px; /* Adjust the font size as needed */
+    }
+
+    table.dataTable td {
+        font-size: 12px;
+        color: black;
+    }
+
+    .dataTables_wrapper tbody tr:hover {
+        cursor: pointer;
+    }
+
+    .table-container {
+        height: 40vh;
+        overflow-y: auto;
+    }
+</style>
+<div class="page-content">
+
+    <div class="row" id="mainContent">
+        <div class="col-md-12 sub-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5 class="card-title">Reports</h5>
+                    <div class=" ">
+                        <div class="dropdown">
+                            <button href="javascript:void(0)" class="btn btn-md btn-primary  dropdown-toggle waves-effect waves-light me-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                Tools <i class="mdi mdi-dots-horizontal fs-xs"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(0px, 42.4px, 0px);" data-popper-placement="bottom-end">
+                                <a href="javascript:void(0)" class="dropdown-item" id="inspectionStatBtn" data-bs-toggle="modal" data-bs-target="#inspectionStatisticsModal">Inspection Statistics</a>
+                                <a href="javascript:void(0)" class="dropdown-item" id="logsListBtn" data-bs-toggle="modal" data-bs-target="#logsListModal">Logs List</a>
+                                <a href="javascript:void(0)" class="dropdown-item" id="ncrListBtn" data-bs-toggle="modal" data-bs-target="#ncrListModal">NCR List</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-end">
+
+                    </div>
+
+                    <div class="table">
+                        <table id="reportSummary" class="table table-hover  table-striped nowrap w-100 fs-12">
+                            <thead>
+                                <tr>
+                                    <th>Decision</th>
+                                    <th>Evaluator</th>
+                                    <th>Inspector</th>
+                                    <th>Control Number</th>
+                                    <th>Date Finished</th>
+                                    <th>Part Code</th>
+                                    <th>Part Name</th>
+                                    <th>Lot Number</th>
+                                    <th>Lot Quantity</th>
+                                    <th>Dr Number</th>
+                                    <th>Time</th>
+                                    <th>Comments</th>
+                                    <th>Inspector Comments</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                        </table>
+                        <div class="d-flex justify-content-center loadingSpinner">
+                            <div class="spinner-grow" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <div class="spinner-grow" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row border border-1 rounded fs-12 p-3">
+                        <h6 class="fw-bolder mt-2">Filter</h6>
+                        <form id="inspectionFilterForm" class="w-100">
+                            <div class="row">
+                                <div class="col-md-6 p-2">
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="partsCodeF" class="fw-bolder">Parts Code</label>
+                                        <input type="text" id="partsCodeF" name="partsCodeF" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="supplierF" class="fw-bolder">Supplier</label>
+                                        <select id="supplierF" name="supplierF" class="form-control form-control-sm supplierSelect">
+                                            <!-- Options go here -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="fromDateF" class="fw-bolder">From</label>
+                                        <input type="date" id="fromDateF" name="fromDateF" class="form-control form-control-sm fromDate" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 p-2">
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="lotNumberF" class="fw-bolder">Lot Number</label>
+                                        <input type="text" id="lotNumberF" name="lotNumberF" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="drNumberF" class="fw-bolder">DR Number</label>
+                                        <input type="text" id="drNumberF" name="drNumberF" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="toDateF" class="fw-bolder">To</label>
+                                        <input type="date" id="toDateF" name="toDateF" class="form-control form-control-sm toDate" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 text-center mb-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="row mt-2 ">
+                        <div class="col-md-12  p-1">
+                            <button class="btn btn-outline-primary btn-md m-1" data-bs-toggle="modal" data-bs-target="#partPerformanceModal">Part Performance</button>
+                            <button class="btn btn-outline-primary btn-md m-1" id="supplierBtn">Supplier Performance</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 sub-content">
+            <div id="partInformation" class="row" style="display: none">
+                <div class="col-lg-12">
+                    <div class="card">
+
+                        <div class="card-body" style="background-color:whitesmoke;">
+                            <ul class="nav nav-pills bg-light nav-justified border-radius partInfoTab">
+                            </ul>
+                            <div class="tab-content partInfoTabContent">
+
+                            </div>
+                        </div>
+                    </div> <!-- end card-box-->
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+</div>
+
+<!--Modal-->
+<div id="partPerformanceModal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="partPerformanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-full-width">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark" id="partPerformanceModalLabel">Part Performance</h5>
+                <div class="d-flex align-content-end">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i class="mdi mdi-close-thick" style="cursor: pointer;"></i></button>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row ">
+                    <h6 class="fw-bolder text-dark">Filter</h6>
+                    <div class="col-md-6">
+                        <form id="partPerformanceForm">
+                            <div class="row border border-1 border round fs-12">
+                                <div class="col-md-4 p-2">
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="partsCodePa" class=" fw-bolder">Parts Code</label>
+                                        <select type="text" id="partsCodePa" name="partsCodePa" class="form-control  form-control-sm partsCodeSelect" required> </select>
+                                    </div>
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="supplierPa" class="fw-bolder">Supplier</label>
+                                        <select type="text" id="supplierPa" name="supplierPa" class="form-control form-control-sm">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 p-2">
+                                    <div class="form-group floating-label enable-floating-label show-label now">
+                                        <label for="fromDatePa" class="fw-bolder">From</label>
+                                        <input type="date" id="fromDatePa" name="fromDatePa" class="form-control form-control-sm fromDate" required>
+                                    </div>
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="toDatePa" class="fw-bolder">To</label>
+                                        <input type="date" id="toDatePa" name="toDatePa" class="form-control form-control-sm toDate" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 p-2">
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="cavityNumberPa" class="fw-bolder">Cavity Number</label>
+                                        <select type="text" id="cavityNumberPa" name="cavityNumberPa" class="form-control form-control-sm">
+                                            <option value="null">All</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group floating-label enable-floating-label show-label">
+                                        <label for="checkpointPa" class="fw-bolder">Check Point</label>
+                                        <select type="text" id="checkpointPa" name="checkpointPa" class="form-control form-control-sm"></select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 text-center mb-2">
+                                    <button id="partPerformanceBtn" type="button" class="btn btn-primary btn-sm" disabled>Search</button>
+
+                                </div>
+                            </div>
+                        </form>
+                        <div class="row fs-12 text-dark d-flex justify-content-center ">
+                            <div class="col-md-2 text-center ">
+                                <div class="form-group">
+                                    <label for="partNamePart" class=" fw-bold">Parts Name</label>
+                                    <input type="text" id="partNamePart" class="btn btn-info btn-sm" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <div class="form-group">
+                                    <label for="partModelPart" class="fw-bolder">Model</label>
+                                    <input type="text" id="partModelPart" class="btn btn-info btn-sm" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center ">
+                                <div class="form-group">
+                                    <label for="partSpecPart" class="fw-bolder">Specification</label>
+                                    <input type="text" id="partSpecPart" class="btn btn-info btn-sm" readonly>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <div class="table-responsive">
+                            <table id="partPerformanceTable"
+                                   class="table table-hover nowrap w-100  fs-12"
+                                   data-fixed-scroll="true"
+                                   data-height="250">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th data-checkbox="true" data-title="CheckBox">
+
+                                        </th>
+                                        <th data-field="LotNumber">
+                                            Lot No.
+                                        </th>
+                                        <th data-field="Specification">
+
+                                            Specification
+                                        </th>
+                                        <th>
+                                            NG Checkpoint No.
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                    </div>
+                    <div class="col-md-2 ml-md-1">
+                        <div class="d-flex flex-column justify-content-between">
+                            <button id="plotXChart" class="btn btn-outline-primary btn-sm m-1" disabled>Plot Charts</button>
+                            <button id="plotRChart" class="btn btn-outline-primary btn-sm m-1" disabled>Plot Cavity Relation</button>
+                            <button id="reportButton" class="btn btn-outline-primary btn-sm m-1" type="submit" disabled>Download<i class="fas fa-cloud-download-alt"></i></button>
+
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <div class="row fs-12 text-dark">
+
+                    <div class="col-md-6">
+                        <canvas id="xChart" height="400" class="chart"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <canvas id="mrChart" class="chart"></canvas>
+                    </div>
+
+
+                    <div class="col-md-8 text-center">
+                        <canvas id="rChart" height="400" class="chart" style="display: none"></canvas>
+                    </div>
+
+                </div>
+                @*<div class="row fs-12 text-dark">
+                        <div class="col-md-12">
+                            <canvas id="rChart" height="400" class="chart"></canvas>
+                        </div>
+                        <button id="downloadPartPerformanceR" class="btn btn-outline-primary btn-sm m-1" type="submit">Download<i class="fas fa-cloud-download-alt"></i></button>
+
+                    </div>*@
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="inspectionStatisticsModal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="fullWidthModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-full-width">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="fullWidthModalLabel">Inspection Statistics</h4>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="row ">
+                    <div class="col-md-12">
+                        <div class="">
+                            <table id="inspectionStatsTbl" class="table table-striped no-wrap fs-12">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Date Delivered
+                                        </th>
+                                        <th>
+                                            Dr Number
+                                        </th>
+                                        <th>
+                                            Part Code
+                                        </th>
+                                        <th>
+                                            Part Name
+                                        </th>
+                                        <th>
+                                            Lot Number
+                                        </th>
+                                        <th>
+                                            Start Inspection
+                                        </th>
+                                        <th>
+                                            End Inspection
+                                        </th>
+                                        <th>
+                                            Elapsed Time
+                                        </th>
+                                        <th>
+                                            Evaluation Time
+                                        </th>
+                                        <th>
+                                            Inspector
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+                    </div>
+                    <div class="col-md-6 border border-1 round">
+                        <h6 class="fw-bolder mt-1">
+                            <span class="badge bg-primary">Statistics</span>
+                        </h6>
+                        <div class="d-flex justify-content-center">
+                            <ul class="d-flex list-group list-group-flush fs-12 fw-bold">
+                                <li class="d-flex" id="inspectionStatsNum">
+                                    Total Number of Inspections:
+                                </li>
+                                <li class="d-flex" id="inspectionStatsMin">
+                                    Minimum Inspection time:
+                                </li>
+                                <li class="d-flex" id="inspectionStatsMax">
+                                    Maximum Inspection time:
+                                </li>
+                                <li class="d-flex" id="inspectionStatsAvg">
+                                    Average Inspection time:
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6 border border-1 round">
+                        <h6 class="fw-bolder mt-1">
+                            <span class="badge bg-primary">Search</span>
+                        </h6>
+                        <div class="d-flex justify-content-center">
+                            <form id="inspectionStatsForm">
+                                <div class="row border border-1 border round fs-12 m-2">
+                                    <div class="col-md-6 p-2">
+                                        <div class="form-group floating-label enable-floating-label show-label now">
+                                            <label for="fromDateIs" class="fw-bolder">From</label>
+                                            <input type="date" id="fromDateIs" name="fromDateIs" class="form-control form-control-sm fromDate" required>
+                                        </div>
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="partsCodeIs" class=" fw-bolder">Parts Code</label>
+                                            <select type="text" id="partsCodeIs" name="partsCodeIs" class="form-control  form-control-sm partsCodeSelect" required> </select>
+                                        </div>
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="inspectorIs" class="fw-bolder">Inspector</label>
+                                            <select type="text" id="inspectorIs" name="inspectorIs" class="form-control form-control-sm">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 p-2">
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="toDateIs" class="fw-bolder">To</label>
+                                            <input type="date" id="toDateIs" name="toDateIs" class="form-control form-control-sm toDate" required>
+                                        </div>
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="partNameIs" class="fw-bolder">Part Name</label>
+                                            <input type="text" id="partNameIs" class="form-control form-control-sm" readonly>
+
+                                        </div>
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="minMaxIs" class="fw-bolder">Show All</label>
+                                            <select type="text" id="minMaxIs" name="minMaxIs" class="form-control form-control-sm">
+                                                <option value="all">All</option>
+                                                <option value="min">Min</option>
+                                                <option value="max">Max</option>
+                                            </select>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-center mb-2">
+                                        <button type="submit" id="inspectionStatsBtn" class="btn btn-primary btn-sm m-2">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 d-flex justify-content-start">
+                        <button class="btn btn-sm btn-primary mt-2" type="submit" id="inspectionStatsExportBtn">
+                            <i class="mdi mdi-microsoft-excel"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="logsListModal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="logsListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-full-width">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="logsListModalLabel">Logs List</h4>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="row ">
+                    <div class="col-md-12">
+                        <div class="">
+                            <table id="logsListTbl" class="table table-striped no-wrap fs-12">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            User
+                                        </th>
+                                        <th>
+                                            Event
+                                        </th>
+                                        <th>
+                                            Comments
+                                        </th>                                     
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+                    </div>
+                  
+                    <div class="col-md-12 border border-1 round">
+                        <h6 class="fw-bolder mt-1">
+                            <span class="badge bg-primary">Filter</span>
+                        </h6>
+                        <div class="d-flex justify-content-center">
+                            <form id="logListForm">
+                                <div class="row border border-1 border round fs-12 m-2">
+                                    <div class="col-md-6 p-2">
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="eventLl" class=" fw-bolder">Event</label>
+                                            <select type="text" id="eventLl" name="eventLl" class="form-control  form-control-sm" required> </select>
+                                        </div>
+                                        <div class="form-group floating-label enable-floating-label show-label now">
+                                            <label for="fromDateLl" class="fw-bolder">From</label>
+                                            <input type="date" id="fromDateLl" name="fromDateLl" class="form-control form-control-sm fromDate" required>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="col-md-6 p-2">
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="userLl" class=" fw-bolder">User</label>
+                                            <select type="text" id="userLl" name="userLl" class="form-control  form-control-sm" required> </select>
+                                        </div>
+                                        <div class="form-group floating-label enable-floating-label show-label now">
+                                            <label for="toDateLl" class="fw-bolder">To</label>
+                                            <input type="date" id="toDateLl" name="toDateLl" class="form-control form-control-sm toDate" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-center mb-2">
+                                        <button type="submit" id="logsListSubmitBtn" class="btn btn-primary btn-sm m-2">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 d-flex justify-content-start">
+                        <button class="btn btn-sm btn-primary mt-2" type="submit" id="logsListExportBtn">
+                            <i class="mdi mdi-microsoft-excel"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>              
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="ncrListModal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="ncrListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-full-width">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="ncrListModalLabel">NCR List</h4>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="row ">
+                    <div class="col-md-12">
+                        <div class="">
+                            <table id="ncrListTbl" class="table table-striped no-wrap fs-12">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                           NCR Control Number
+                                        </th>
+                                        <th>
+                                            Lot Number
+                                        </th>
+                                        <th>
+                                            Date Finished
+                                        </th>
+                                        <th>
+                                            Part
+                                        </th>
+                                        <th>
+                                            Supplier
+                                        </th>
+                                        <th>
+                                           Status
+                                        </th>                                 
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+                    </div>
+                
+                    <div class="col-md-12 border border-1 round">
+                        <h6 class="fw-bolder mt-1">
+                            <span class="badge bg-primary">Filter</span>
+                        </h6>
+                        <div class="d-flex justify-content-center">
+                            <form id="ncrListForm">
+                                <div class="row border border-1 border round fs-12 m-2">
+                                    <div class="col-md-12 p-2">                                       
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="partCodeN" class=" fw-bolder">Parts Code</label>
+                                            <select type="text" id="partCodeN" name="partCodeN" class="form-control  form-control-sm partsCodeSelect" required> </select>
+                                        </div>
+                                        <div class="form-group floating-label enable-floating-label show-label">
+                                            <label for="supplierN" class="fw-bolder">Supplier</label>
+                                            <select type="text" id="supplierN" name="supplierN" class="form-control form-control-sm supplierSelect">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-12 text-center mb-2">
+                                        <button type="submit" id="ncrListSubmitBtn" class="btn btn-primary btn-sm m-2">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 d-flex justify-content-start">
+                        <button class="btn btn-sm btn-primary mt-2" type="submit" id="ncrListExportBtn">
+                            <i class="mdi mdi-microsoft-excel"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<!-- End users load -->
+@section scripts {
+    <script src="~/assets/libs/chartjs/js/Chart.bundle.min.js"></script>
+    <script>
+      $(document).ready(function () {
+
+          //Default variables
+          var suppliers;
+          var reportSummary;
+          var reportSummaryJson;
+          var toDate = new Date();
+          var fromDate = new Date(toDate); // Clone the toDate
+          fromDate.setFullYear(toDate.getFullYear() - 1);
+          var fromDateInput = fromDate.toISOString().split('T')[0];
+          var toDateInput = toDate.toISOString().split('T')[0];
+          $(document).find('.toDate').val(toDateInput);
+          $(document).find('.fromDate').val(fromDateInput);
+          var partPerformanceObj = {};
+          var limits = {};
+          var xChart = null
+          var mrChart = null;
+          var rChart = null;
+          var supplierObj;
+          var inspectionStat;
+          var logsListTbl;
+          var ncrListTbl;
+          //Function Call for Inspection Summary
+          getInspectionSummary();
+          getSuppliers();
+          getPartsCode();
+
+// <!---------- FUNCTIONS FOR PARSING, FILTERING ----------!>
+    function adjustColumn() {
+              let cols = $('.main-content').find('.sub-content');
+              let secondSubContent = cols.eq(1); // Get the second sub-content
+              let navLists = secondSubContent.find('.nav-pills');
+
+              if (navLists.find('li').length > 0) {
+                  // If there are <li> elements, adjust both columns to col-md-6
+                  cols.eq(0).removeClass('col-md-12').addClass('col-md-6');
+                  cols.eq(1).removeClass('col-md-12').addClass('col-md-6');
+              } else {
+                  // If there are no <li> elements, expand the first sub-content to col-md-12
+                  cols.eq(0).removeClass('col-md-6').addClass('col-md-12');
+                  cols.eq(1).removeClass('col-md-6').addClass('col-md-12');
+              }
+          }
+
+    function formatSpecification(specification) {
+        if (specification.includes('�')) {
+            return specification.replace(/�/g, '±');
+        } else {
+            return specification;
+        }
+    }
+
+    //Numeric Date e.g "05-19-2024"
+    function parseDateNum(rawDate) {
+        var date = new Date(parseInt(rawDate.substr(6))); // Convert Unix timestamp to milliseconds
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2); // Add leading zero if necessary
+        var day = ('0' + date.getDate()).slice(-2); // Add leading zero if necessary
+        return year + '-' + month + '-' + day;
+    }
+    //Numeric Date e.g "05-19-2024"
+    function parseDateStr(rawDate) {
+              if (rawDate != null) {
+                  var date = new Date(parseInt(rawDate.substr(6))); // Convert Unix timestamp to milliseconds
+                  return date.toLocaleDateString(
+                      'en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                  });
+              }
+              else {
+                  return null;
+              }
+
+          }
+
+    function parseDateStrTime(rawDate) {
+              if (rawDate != null) {
+                  var date = new Date(parseInt(rawDate.substr(6))); // Convert Unix timestamp to milliseconds
+                  return date.toLocaleDateString(
+                      'en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric',
+                      second: 'numeric',
+                      hour12: true
+                  });
+              }
+              else {
+                  return null;
+              }
+          }
+
+    function parseTime(rawTime) {
+        var hours = Math.floor(rawTime / (1000 * 60 * 60));
+        var minutes = Math.floor((rawTime % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((rawTime % (1000 * 60)) / 1000);
+        var ms = rawTime % 1000;
+        // Format the duration
+        var formattedDuration =
+            ('0' + hours).slice(-hours.toString().length) + ':' +
+            ('0' + minutes).slice(-2) + ':' +
+            ('0' + seconds).slice(-2) + '.' +
+            ('00' + ms).slice(-3, -2); // Ensure milliseconds are padded with zeros
+
+        return formattedDuration
+    }
+
+    function getAnnotations(dataArray) {
+        // Group data by cavity name
+        const groupedData = {};
+        dataArray.forEach((lot) => {
+            const cavityName = lot.cavity;
+            if (!groupedData.hasOwnProperty(cavityName)) {
+                groupedData[cavityName] = [];
+            }
+            groupedData[cavityName].push(lot.data);
+            groupedData[cavityName]["specs"] = lot.specs;
+        });
+
+        // Calculate annotations for each cavity
+        const annotations = [];
+        Object.keys(groupedData).forEach((cavityName) => {
+            const upperLimit = groupedData[cavityName].specs.upperLimit;
+            const lowerLimit = groupedData[cavityName].specs.lowerLimit;
+            const cavityData = groupedData[cavityName].flat();
+            const annotation = {};
+
+            const cavityValues = cavityData.map(item => item.y);
+            const mean = cavityValues.reduce((acc, val) => acc + val, 0) / cavityValues.length;
+
+            const squaredDifferences = cavityValues.map(val => Math.pow(val - mean, 2));
+            const variance = squaredDifferences.reduce((acc, val) => acc + val, 0) / (cavityValues.length - 1);
+            const standardDeviation = Math.sqrt(variance);
+            const zoneA = { lower: mean - 3 * standardDeviation, upper: mean + 3 * standardDeviation };
+            const zoneB = { lower: mean - 2 * standardDeviation, upper: mean + 2 * standardDeviation };
+            const zoneC = { lower: mean - standardDeviation, upper: mean + standardDeviation };
+
+            annotation["stdv"] = standardDeviation;
+            annotation["avg"] = mean;
+            annotation["zoneA"] = zoneA;
+            annotation["zoneB"] = zoneB;
+            annotation["zoneC"] = zoneC;
+            annotation["specs"] = { "usl": upperLimit, "lsl": lowerLimit };
+
+            // Calculate MR Chart data
+            const movingRanges = [];
+            for (let i = 1; i < cavityValues.length; i++) {
+                const range = Math.abs(cavityValues[i] - cavityValues[i - 1]);
+                movingRanges.push(range);
+            }
+            const averageMovingRange = movingRanges.reduce((acc, val) => acc + val, 0) / movingRanges.length;
+            const upperControlLimitMR = averageMovingRange * 3.267;
+            const lowerControlLimitMR = 0;
+
+            annotation["mrChart"] = {
+                data: movingRanges.map((mr, index) => ({ x: index + 1, y: mr })),
+                average: averageMovingRange,
+                ucl: upperControlLimitMR,
+                lcl: lowerControlLimitMR
+            };
+
+            // Calculate X-bar Chart data
+            const subGroupSize = 5; // Example subgroup size
+            const subGroups = [];
+            for (let i = 0; i < cavityValues.length; i += subGroupSize) {
+                const subGroup = cavityValues.slice(i, i + subGroupSize);
+                if (subGroup.length === subGroupSize) {
+                    subGroups.push(subGroup);
+                }
+            }
+            const subGroupMeans = subGroups.map(group => group.reduce((acc, val) => acc + val, 0) / group.length);
+            const overallMean = subGroupMeans.reduce((acc, val) => acc + val, 0) / subGroupMeans.length;
+
+            const subGroupRanges = subGroups.map(group => Math.max(...group) - Math.min(...group));
+            const averageRange = subGroupRanges.reduce((acc, val) => acc + val, 0) / subGroupRanges.length;
+            const a2 = 0.577; // Example constant for subgroup size 5
+            const upperControlLimitXBar = overallMean + (a2 * averageRange);
+            const lowerControlLimitXBar = overallMean - (a2 * averageRange);
+
+            annotation["xBarChart"] = {
+                data: subGroupMeans.map((mean, index) => ({ x: index + 1, y: mean })),
+                average: overallMean,
+                ucl: upperControlLimitXBar,
+                lcl: lowerControlLimitXBar
+            };
+
+            // Calculate R Chart data
+            const d4 = 2.114; // Example constant for subgroup size 5
+            const d3 = 0;     // Example constant for subgroup size 5
+            const upperControlLimitR = averageRange * d4;
+            const lowerControlLimitR = averageRange * d3;
+
+            annotation["rChart"] = {
+                data: subGroupRanges.map((range, index) => ({ x: index + 1, y: range })),
+                average: averageRange,
+                ucl: upperControlLimitR,
+                lcl: lowerControlLimitR
+            };
+
+            // Calculate I Chart data and limits
+            const xBarMean = mean;
+            const xBarUCL = xBarMean + (2.66 * averageMovingRange);
+            const xBarLCL = xBarMean - (2.66 * averageMovingRange);
+
+            annotation["iChart"] = {
+                data: cavityValues.map((value, index) => ({ x: index + 1, y: value })),
+                mean: xBarMean,
+                ucl: xBarUCL,
+                lcl: xBarLCL
+            };
+
+            annotations.push({ name: cavityName, data: cavityData, annotations: annotation });
+        });
+
+        return annotations;
+    }
+
+    function closeTabPane() {
+        var tabID = $(this).attr('data-id'); // Get the data-id attribute of the clicked element
+        $(this).closest('li').remove(); // Remove the closest 'li' element of the clicked close button
+
+        // Check if the tab pane exists before trying to remove it
+        if (tabID && $(tabID).length) {
+            $(tabID).remove();
+        }
+
+        // Select the first tab link and show it
+        var tabFirst = $('#tab-list a:first');
+        if (tabFirst.length) {
+            tabFirst.tab('show');
+        }
+
+        adjustColumn(); // Assuming this function exists and needs to be called
+          }
+
+
+
+    function exportInspectionResult() {
+        let inspectionId = $(this).attr('data-id');
+        var btn = $(this);
+
+        // Create a loading button element
+        var loadingBtn = $(`<button type="submit" class="btn btn-primary btn-sm inspectionInfo" data-id="${inspectionId}"  disabled>
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Loading...
+                            </button>`);
+        // Replace the original button with the loading button
+        btn.replaceWith(loadingBtn);
+
+        let ajaxResult = $.ajax({
+            async: true,
+            url: '@Url.Action("ExportToExcel", "PartsIq")', // Update controller name to "Excel"
+            method: "GET",
+            data: { inspectionId: inspectionId },
+            xhrFields: {
+                responseType: 'blob' // Set the response type to blob
+            },
+            success: function (response, status, xhr) {
+                if (status != 'success') {
+                    alertify.error("Error encountered");
+                    loadingBtn.replaceWith(btn);
+                }
+                else {
+                    alertify.success("File downloaded");
+                    loadingBtn.replaceWith(btn);
+                    // Create a Blob object
+                    const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    // Create a Blob URL
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    // Create a temporary link element
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    // Set the href and download attributes
+                    a.href = blobUrl;
+                    a.download = `${inspectionId}.xlsx`; // Set the filename here
+                    // Trigger a click event on the link to start the download
+                    a.click();
+                    // Clean up by revoking the Blob URL
+                    window.URL.revokeObjectURL(blobUrl);
+                }
+
+            },
+            error: function (xhr, status, error) {
+                alertify.error(`Error  ${error} occured. Contact administrator`);
+                loadingBtn.replaceWith(btn);
+            }
+        });
+    }
+
+    function getInspectionSummary() {
+        $.ajax({
+            url: '@Url.Action("GetInspectionSummary", "PartsIq")',
+            method: "GET",
+            async: true,
+            success: function (response) {
+                $(document).find('.loadingSpinner').remove();
+                reportSummaryJson = response;
+                if (reportSummaryJson) {
+                    reportSummary = $("#reportSummary").DataTable({
+                        lengthChange: !1,
+                        buttons: [
+                            { extend: "copy", className: "btn-light" },
+                            { extend: "csv", className: "btn-light" },
+                        ],
+                        columns: [
+                            { data: "Decision" },
+                            { data: "Evaluator" },
+                            { data: "Inspector" },
+                            { data: "ControlNumber" },
+                            {
+                                data: "DateFinished",
+                                type: "date",
+                                render: function (data) {
+                                    if (!data) return ""; // Handle null or undefined values
+                                    var date = new Date(parseInt(data.substr(6))); // Convert Unix timestamp to milliseconds
+                                    return date.toLocaleDateString(
+                                        'en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                    }); // Format the date
+                                }
+                            },
+                            { data: "PartCode" },
+                            { data: "PartName" },
+                            { data: "LotNumber" },
+                            { data: "LotQuantity" },
+                            { data: "DrNumber" },
+                            {
+                                data: "Time",
+                                render: function (data, type, row) {
+                                    var hours = Math.floor(data / (1000 * 60 * 60));
+                                    var minutes = Math.floor((data % (1000 * 60 * 60)) / (1000 * 60));
+                                    var seconds = Math.floor((data % (1000 * 60)) / 1000);
+                                    var ms = data % 1000;
+                                    // Format the duration
+                                    var formattedDuration =
+                                        ('0' + hours).slice(-2) + ':' +
+                                        ('0' + minutes).slice(-2) + ':' +
+                                        ('0' + seconds).slice(-2) + '.' +
+                                        ('00' + ms).slice(-3, -2); // Ensure milliseconds are padded with zeros
+                                    return formattedDuration;
+                                }
+                            },
+                            { data: "Comments" },
+                            { data: "InspectorComments" },
+                            {
+                                data: 'InspectionId',
+                                render: function (data, type, row) {
+                                    return `
+                            <button type="submit" class="btn btn-sm btn-primary inspectionInfoBtn" id="${data}" data-id="btn-${data}">Inspection Info</button>
+                            <button class="btn btn-sm btn-primary inspectionResultBtn" data-id="${data}">Inspection Result</button>
+                            <button class="btn btn-sm btn-primary nonconformityBtn"
+                                data-id="${data}"
+                                data-supplierName="${row.SupplierName}"
+                                data-lotNumber="${row.LotNumber}"
+                                data-partCode="${row.PartCode}"
+                                data-partName="${row.PartName}"
+                                data-drNumber="${row.DrNumber}"
+                                data-supplierincharge="${row.SupplierInCharge}"
+                                data-lotQuantity="${row.LotQuantity}"
+                                data-decision="${row.Decision}">
+                                Nonconformity Report
+                            </button> `;
+                                }
+                            },
+                        ],
+                        data: reportSummaryJson,
+                        order: [[4, 'desc']],
+                        rowId: "InspectionId",
+                        scrollX: true,
+                        scrollY: '300px',
+                        responsive: true,
+                        searching: false,
+                        language: {
+                            paginate: {
+                                previous: "<i class='mdi mdi-chevron-left'>",
+                                next: "<i class='mdi mdi-chevron-right'>",
+                            },
+                        },
+                        drawCallback: function () {
+                            $(".dataTables_paginate > .pagination").addClass(
+                                "flat-rounded-pagination"
+                            ),
+                                $(".dataTables_filter")
+                                    .find("label")
+                                    .addClass("search-box d-inline-flex position-relative"),
+                                $(".dataTables_filter")
+                                    .find(".form-control")
+                                    .attr("placeholder", "Search...");
+                        },
+                    });
+                    reportSummary.buttons().container().appendTo("#reportSummary_wrapper .col-md-6:eq(0)");
+                    // Add click event listener to table rows
+                    $('#reportSummary tbody').on('click', 'tr', function () {
+                        var rowData = reportSummary.row(this).data();
+                        // Open modal and display details
+                        showModal(rowData);
+                    });
+
+                    function showModal(rowData) {
+                        // Construct modal content using rowData
+                        var modalContent = '<div class="modal-content">';
+                        // Add details from rowData to modalContent
+                        // Example: modalContent += '<p>' + rowData['Decision'] + '</p>';
+                        modalContent += '</div>';
+                        // Set modal HTML content
+                        $('#myModal').html(modalContent);
+                        // Show modal
+                        $('#myModal').modal('show');
+                    }
+                }
+
+                //EVENT HANDLERS FOR 3 BUTTONS
+
+                //For Inspection Info Button
+                $('#reportSummary tbody').on('click', '.inspectionInfoBtn', function () {
+                    inspectionInfo.call(this);
+                });
+
+                //For NonConformity Button
+                $('#reportSummary tbody').on('click', '.nonconformityBtn', function () {
+                    nonConformity.call(this);
+                });
+            },
+            error: function (err) {
+                alertify.error("Network or internal server occured. Call administrator");
+            }
+        });
+
+    }
+
+    function getSuppliers() {
+        //For Supplier Select Input
+        $.ajax({
+            url: '@Url.Action("GetSuppliers", "PartsIq")',
+            method: "Get",
+            async: true,
+            success: function (response) {
+                suppliers = response;
+                let html = '';
+                html += '<option value="null" selected>Select </option>'
+                suppliers.forEach((supplier, index) => {
+                    html += `<option value= ${supplier.Id}> ${supplier.Name} </option>`
+                });
+                $(document).find('.supplierSelect').each(function () {
+                    $(this).html(html);
+                });
+            },
+            error: function (err) {
+                alertify.error(`Error ${err} occured. Contact administrator`);
+            },
+        });
+    }
+
+    function getPartsCode() {
+        //For PartsCode Select
+        $.ajax({
+            url: '@Url.Action("PartsCode", "PartsIq")',
+            method: "Get",
+            async: true,
+            success: function (response) {
+                let html = '';
+                html += '<option value="null" selected>Select </option>'
+                response.forEach((part) => {
+                    html += `<option value=${part.PartId}> ${part.PartCode}</option> `;
+                });
+                $(document).find(".partsCodeSelect").html(html);
+            },
+            error: function (err) {
+                alertify.error(`Error ${err} occured. Contact administrator`);
+            }
+        });
+
+    }
+
+
+    function inspectionInfo() {
+        let id = $(this).attr('id');
+        let btnId = $(this).attr('data-id');
+        var btn = $(this);
+        // Create a loading button element
+        var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary inspectionInfo" data-id="${btnId}" id="${id}" disabled>
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </button>`);
+        btn.replaceWith(loadingBtn);
+        let html = '';
+        let htmlTabContent = '';
+
+        let partInfoTab = $(document).find(".partInfoTab");
+        let partInfoTabContent = $(document).find(".partInfoTabContent");
+        $('#partInformation').show();
+        $.ajax({
+            url: '@Url.Action("GetInspectionDetailsPerId", "PartsIq")',
+            method: "GET",
+            data: { id: id },
+            success: function (response) {
+                console.log(btn);
+                response = response[0];
+                loadingBtn.replaceWith(btn[0]);
+                var checkExisting = $(document).find($(`#${response.InspectionId}-test`));
+                if (checkExisting.length == 0) {
+                    html += `<li class="nav-item" id="${response.InspectionId}-test">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="#Tab${response.InspectionId}" id="${response.InspectionId}-tab" data-bs-toggle="tab" role="tab" aria-expanded="false" class="nav-link">${response.LotNumber}
+                                </a>  <i class="mdi mdi-close-thick closeTabPane" data-id ="#Tab${response.InspectionId}" style="cursor: pointer;"></i> </li>
+                            </div>`;
+                    partInfoTab.append(html);
+                    htmlTabContent += ` <div class="tab-pane" role="tabpane" aria-labelledby="${response.InspectionId}-tab"id="Tab${response.InspectionId}">
+                                <div class="card">
+                                    <div class="card-header">
+                                    <h6 class="fw-bolder">
+                                    <div class=" d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary"> General Information </span>
+                                    </div>
+                                    </h6>
+                                    </div>
+<div class="card-body">
+    <div class="row mb-1 partGeneralInformation">
+    <div class="col-md-6">
+    <ul class="list-group" >
+        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Lot Number: </span>  <span class="fw-normal ms-1"> ${response.LotNumber} </span> </li>
+        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Lot Date Delivered: </span> <span class="fw-normal ms-1"> ${parseDateStr(response.InspectionEnd)} </span> </li>
+        <li class=" d-flex justify-content-start align-items-start "><span class="fw-bolder">  Part Code: </span> <span class="fw-normal ms-1"> ${response.PartsCode}</span> </li>
+        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Sample Size: </span> <span class="fw-normal ms-1">${response.SampleSize}</span> </li>
+        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Time: </span> <span class="fw-normal ms-1"> ${parseTime(response.Time)}</span> </li>
+            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Lower Limit: </span>  <span class="fw-normal ms-1 lowerLimitSpan">  </span> </li>
+        </ul>
+        </div>
+<div class="col-md-6">
+        <ul class="list-group" >
+        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Lot Quantity: </span>  <span class="fw-normal ms-1"> ${response.LotQuantity}  </span> </li>
+            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Supplier: </span>  <span class="fw-normal ms-1"> ${response.SupplierName}  </span> </li>
+            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Part Name: </span>  <span class="fw-normal ms-1"> ${response.PartName}  </span> </li>
+            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> No. of Cavity: </span>  <span class="fw-normal ms-1">${response.CavityCount} </span> </li>
+            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Upper Limit: </span>  <span class="fw-normal ms-1 upperLimitSpan"> </span> </li>
+            </ul>
+    </div>
+    </div>
+        <hr>
+<div class="row checkPointInfo">
+<div class="d-flex justify-content-center">
+    <div class="spinner-border m-2 checkpoint" role="status">
+    <span class="sr-only">Loading...</span>
+    </div>
+    </div>
+</div>
+<hr>
+<div class="container evaluatorDecision ">
+<h6 class="fw-bolder">
+<span class="badge bg-primary"> Evaluator Decision </span>
+</h6>
+    <ul class="list-group" >
+    <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Evaluator: </span>  <span class="fw-normal ms-1"> ${response.Evaluator}  </span> </li>
+    <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Comments: </span>  <span class="fw-normal ms-1"> ${response.Comments}  </span> </li>
+    <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Decision: </span>  <span class="fw-normal ms-1"> ${response.Decision}  </span> </li>
+    </ul>
+</div>
+</div>
+</div>
+</div> `;
+                    partInfoTabContent.append(htmlTabContent);
+                }
+                var href = `#partInformation`;
+                var element = document.querySelector(href);
+                if (element) {
+                    // Calculate the position of the element relative to the viewport
+                    var y = element.getBoundingClientRect().top + window.scrollY;
+                    // Scroll to the element smoothly
+                    window.scrollTo({
+                        top: y,
+                        behavior: 'smooth'
+                    });
+                }
+                let x = $(document).find(`#${response.InspectionId}-tab`);
+                x.trigger('click');
+
+                //ajax call for Part Check points
+                $.ajax({
+                    url: '@Url.Action("GetInspectionInfoPerId", "PartsIq")',
+                    method: "GET",
+                    data: { id: id },
+
+                    success: function (responseInfo) {
+
+                        $(document).on('change', '.filterNg', function () {
+                            let selectCheckpoint = $(document).find(`#Tab${responseInfo[0].InspectionId} .selectCheckpointInfo:visible`);
+
+                            selectCheckpoint.trigger('change');
+                        });
+                        let htmlInfo = '';
+                        htmlInfo = `<div class="col-md-12 d-flex justify-content-center">
+                Checkpoint: <select data-inspectionid = "${response.InspectionId}"class='ms-1 mt-1 selectCheckpointInfo'> `;
+                        htmlInfo += '<option selected>Select </option>';
+                        responseInfo.forEach((info, index) => {
+                            htmlInfo += `<option data-lowerlimit="${info.LowerLimit}" data-upperlimit="${info.UpperLimit}" value="${info.CheckpointId}">${(info.WithInvalid == 1) ? info.CCode + "(w/NG)" : info.CCode}</option>`;
+                        });
+                        htmlInfo += `</select>
+                <div class="m-1">
+                <div class="form-check">
+                        <input class="form-check-input filterNg" type="checkbox" value="" >
+                        <label class="form-check-label" for="filterNg">
+                            Filter NG
+                            </label>
+                    </div>
+                </div>
+                </div> <div class='checkpointTable'> </div>`;
+                        $(`#Tab${response.InspectionId}`).find('.checkPointInfo').html(htmlInfo);
+                    }
+                });
+                adjustColumn();
+
+            },
+            error: function (error) {
+                alertify.error(`Error ${error} occured. Contact administrator`)
+            },
+        });
+    }
+
+    async function getUsers() {
+        try {
+            let users = await $.ajax({
+                url: '@Url.Action("GetUsers", "PartsIq")',
+                type: "GET"
+            });
+            return users;
+        } catch (error) {
+            alertify.error("Error occurred in fetching inspectors");
+            return [];
+        }
+    }
+
+    function nonConformity() {
+                var decision = $(this).data('decision');
+                var supplierName = $(this).data('suppliername');
+                var supplierInCharge = $(this).data('supplierincharge') ;
+                var lotNumber = $(this).data('lotnumber');
+                var partCode = $(this).data('partcode');
+                var partName = $(this).data('partname');
+                var drNumber = $(this).data('drnumber');
+                var lotQuantity = $(this).data('lotquantity');
+                let inspectionId = $(this).data('id');
+                let btnId = $(this).attr('data-id');
+                var btn = $(this);
+                // Create a loading button element
+                var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary inspectionInfo" data-id="${btnId}" id="${inspectionId}" disabled>
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </button>`);
+                console.log('Loading button:', loadingBtn);
+                // Replace the original button with the loading button
+                btn.replaceWith(loadingBtn);
+                let html = '';
+                let htmlTabContent = '';
+                let partInfoTab = $(document).find(".partInfoTab");
+                let partInfoTabContent = $(document).find(".partInfoTabContent");
+                $('#partInformation').show();
+                $.ajax({
+                    url: '@Url.Action("GetNonConformityReport", "PartsIq")',
+                    type: "GET",
+                    data: { inspectionId: btnId },
+                    async: true,
+                    success: function (response) {
+                        loadingBtn.replaceWith(btn);
+                        var checkExistingLi = $(document).find($(`#nonConformity-test`));
+                        var checkExistingTab = $(document).find($('#TabNonConformity'));
+                        html += `<li class="nav-item" id="nonConformity-test">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="#TabNonConformity" id="nonConformity-tab" data-bs-toggle="tab" role="tab" aria-expanded="false" class="nav-link">Nonconformity Report
+                            </a>  <i class="mdi mdi-close-thick closeTabPane" data-id ="#TabNonConformity" style="cursor: pointer;"></i></li>
+                        </div>
+                            `;
+                        if (checkExistingLi.length != 0) {
+                        }
+                        else {
+                            partInfoTab.append(html);
+                        }
+                        htmlTabContent += ` <div class="tab-pane" role="tabpane" aria-labelledby="#nonConformity-tab"id="TabNonConformity">
+                            <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">Nonconformity Report</h5>
+                                </div>
+                                <div class="card-body nonconformityBody">
+                                </div>
+                                </div>
+                                </div>
+                                </div>`;
+                        if (checkExistingTab.length == 0) {
+                            partInfoTabContent.append(htmlTabContent);
+                        }
+                        htmlTabContent = `
+                                    <div class="row border border-1 round fs-12">
+                                        <h6 class="fw-bolder mt-1">
+                                        <span class="badge bg-primary">General Information</span>
+                                        </h6>
+                                    <div class="col-md-6">
+                                    <ul class="list-group">
+                                        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Supplier: </span>  <span class="fw-normal ms-1"> ${supplierName} </span> </li>
+                                        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Person In-Charge: </span> <span class="fw-normal ms-1"> ${(supplierInCharge) != "undefined" ? supplierInCharge : ""}  </span> </li>
+                                        <li class=" d-flex justify-content-start align-items-start "><span class="fw-bolder">  Lot Number: </span> <span class="fw-normal ms-1">${lotNumber} </span> </li>
+                                        <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Lot Quantity: </span> <span class="fw-normal ms-1">${lotQuantity}</span> </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-group">
+                                            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Part Code: </span>  <span class="fw-normal ms-1"> ${partCode}  </span> </li>
+                                            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> Part Name: </span>  <span class="fw-normal ms-1">${partName}</span> </li>
+                                            <li class=" d-flex justify-content-start align-items-start "> <span class="fw-bolder"> DR Number: </span>  <span class="fw-normal ms-1">${drNumber}</span> </li>
+                                            </ul>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                <ul class="list-group">`;
+                        if (response.RejectPercentage) {
+                            htmlTabContent += `<li class=" d-flex fs-12"> <span class="fw-bolder"> Quantity of NG Samples: </span>  <span class="fw-normal ms-1">${response.RejectPercentage.NgRejectSamples} </span> </li>
+                            <li class="d-flex fs-12"> <span class="fw-bolder"> Total Number of Samples: </span>  <span class="fw-normal ms-1"> ${response.RejectPercentage.QuantitySamples ? response.RejectPercentage.QuantitySamples : 0}</span> </li>
+                            <li class="d-flex fs-12"> <span class="fw-bolder"> % Reject: </span>  <span class="fw-normal ms-1"> ${response.RejectPercentage.RejectPercentage.toFixed(2)}%</span> </li>
+                                                                `;
+                                                            }
+                        else {
+                            htmlTabContent +=
+                                `<li class="d-flex fs-12"> <span class="fw-bolder"> Total Number of Samples: </span>  <span class="fw-normal ms-1">0</span> </li>
+                                <li class="d-flex fs-12"> <span class="fw-bolder"> % Reject: </span>  <span class="fw-normal ms-1">0%</span> </li>
+                                                                    `;
+                        }
+                        htmlTabContent+=`
+                            </ul>
+                                </div>
+                                <div class="table-container">
+                                <table class="table table-bordered table-hover fs-12">
+                                        <thead class="text-center">
+                                        <tr>
+                                            <th scope="col">Test Item</th>
+                                            <th scope="col">Specification</th>
+                                            <th scope="col">Actual Dimension</th>
+
+                                        </tr>
+                                        </thead>
+                                        <tbody class="text-center text-danger">
+                                        `; response.Checkpoints.forEach((checkpoint, index) => {
+                                            if (!checkpoint.IsGood) {
+                                                htmlTabContent += ` <tr>
+                                                    <th scope="row ">${checkpoint.CCode}</th>
+                                                    <td>${formatSpecification(checkpoint.Specification)}</td>
+                                                    <td> ${(checkpoint.MeasurementAttr.length > 0) ? checkpoint.MeasurementAttr : checkpoint.Measurement}</td>
+                                                    </tr>`
+                                            }
+                                        });
+                            htmlTabContent += `
+                                        </tbody>
+                                    </table>
+                                    </div>
+                                        <div class="row border border-1 round fs-12">
+                                            <h6 class="fw-bolder mt-1">
+                                            <span class="badge bg-primary">Nature of Claim</span>
+                                            </h6>
+                                        <div class="col-md-12">
+                                        <div class="d-flex justify-content-start">
+                                            <ul class="list-group">
+                                                <li class="d-flex"> <span class="fw-bolder"> Decision: </span>  <span class="fw-normal ms-1"> ${decision} </span> </li>
+                                                <li class="d-flex"> <span class="fw-bolder"></span> <span class="fw-normal ms-1"><textarea class="form-control form-control-sm" name="nonconformityTextarea" id="nonconformityTextarea" rows="5" hidden></textarea>  </span> </li>
+                                                <li class="d-flex"> <span class="fw-bolder"></span> <span class="fw-normal ms-1"><input id="nonconformityControl" type="text" class="form-control form-control-sm" hidden></span> </li>
+                                                </ul>
+                                        </div>
+                                        </div>
+                                        </div>
+                                        <hr class="m-2"/>
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn btn-sm btn-primary" type="submit" id="nonconformityExportBtn"
+                                                data-id="${inspectionId}"
+                                                data-supplierName="${supplierName}"
+                                                data-lotNumber="${lotNumber}"
+                                                data-partCode="${partCode}"
+                                                data-partName="${partName}"
+                                                data-drNumber="${drNumber}"
+                                                data-lotQuantity="${lotQuantity}"
+                                                data-supplierInCharge = "${supplierInCharge}"
+                                                data-decision = "${decision}"
+                                                >
+                                              <i class="mdi mdi-microsoft-excel"></i> Export</button>
+                                            </div>`;
+                        var body = $(document).find('.nonconformityBody');
+                        body.html(htmlTabContent)
+                        adjustColumn()
+                    },
+                    error: function (err) {
+                        alertify.error(`Error ${err} occured. Contact Administrator`)
+                    }
+                })
+
+          }
+
+    function inspectionStatsSummary(obj, partCode) {
+        var inspectionDuration = obj.map(ob => ob.InspectionDuration);
+        $('#inspectionStatsNum').text(`Total Number of Inspections: ${obj.length} `);
+        var min = "";
+        var max = "";
+        var avg = "";
+        if (partCode != "null" && obj.length > 0) {
+             max = parseTime(Math.max(...inspectionDuration));
+             min = parseTime(Math.min(...inspectionDuration));
+            avg = parseTime(inspectionDuration.reduce((ac, value) => {
+                return ac + value;
+            }, 0) / inspectionDuration.length);
+
+        }
+        $('#inspectionStatsMin').text(`Minimum Inspection Time: ${min} `);
+        $('#inspectionStatsMax').text(`Maximum Inspection Time: ${max} `);
+        $('#inspectionStatsAvg').text(`Average Inspection Time: ${avg} `);
+          }
+
+    function inspectionStatsMinMax(obj) {
+        var minMax = $('#minMaxIs option:selected').val();
+        if (minMax == 'min') {
+
+        }
+        else if (minMax == 'max') {
+
+        }
+        else {
+            return obj;
+        }
+          }
+
+    async function inspectionStatistics() {
+        try {
+            $('#inspectionStatsTbl').append(`<div class="d-flex justify-content-center  loadingSpinner">
+            <div class="spinner-grow" role="status">
+            <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow" role="status">
+            <span class="sr-only">Loading...</span>
+            </div>
+            </div>`);
+
+
+            $.ajax({
+                async: true,
+                url: '@Url.Action("GetInspectionStatistics", "PartsIq")',
+                method: "GET",
+                success: function (response) {
+                    if (response) {
+                        $(document).find('.loadingSpinner').remove();
+                        if ($.fn.DataTable.isDataTable($("#inspectionStatsTbl"))) {
+                            // DataTable already initialized, destroy it
+                            inspectionStat.clear().rows.add(response).draw();
+                            inspectionStatsSummary(response, 'null');
+                        }
+                        else {
+                            inspectionStat = $('#inspectionStatsTbl').DataTable({
+                                lengthChange: !1,
+                                buttons: [
+                                    { extend: "copy", className: "btn-light" },
+                                    { extend: "csv", className: "btn-light" },],
+                                columns: [
+                                    {
+                                        data: "DateDelivered",
+                                        type: "date",
+                                        render: function (data) {
+                                            return parseDateStr(data)
+                                        }
+
+                                    },
+                                    { data: "DrNumber" },
+                                    { data: "PartCode" },
+                                    { data: "PartName" },
+                                    { data: "LotNumber" },
+                                    {
+                                        data: "InspectionStart",
+                                        type: "date",
+                                        render: function (data) {
+                                            return parseDateStrTime(data)
+                                        }
+
+                                    },
+                                    {
+                                        data: "InspectionEnd",
+                                        type: "date",
+                                        render: function (data) {
+                                            return parseDateStrTime(data)
+                                        }
+
+                                    },
+                                    {
+                                        data: "InspectionDuration",
+                                        render: function (data) {
+                                            return parseTime(data)
+                                        }
+
+
+                                    },
+                                    {
+                                        data: "EvaluationDuration",
+                                        render: function (data, type, row) {
+                                            return parseTime(data - row.InspectionDuration)
+                                        }
+
+                                    },
+                                    { data: "Inspector" },
+
+                                ],
+                                data: response,
+                                searching: false,
+                                order: [[0, 'desc']],
+                                rowId: "InspectionId",
+                                scrollY: '300px',
+                                responsive: true,
+                                language: {
+                                    paginate: {
+                                        previous: "<i class='mdi mdi-chevron-left'>",
+                                        next: "<i class='mdi mdi-chevron-right'>",
+                                    },
+                                },
+                                drawCallback: function () {
+                                    $(".dataTables_paginate > .pagination").addClass(
+                                        "flat-rounded-pagination"
+                                    ),
+                                        $(".dataTables_filter")
+                                            .find("label")
+                                            .addClass("search-box d-inline-flex position-relative"),
+                                        $(".dataTables_filter")
+                                            .find(".form-control")
+                                            .attr("placeholder", "Search...");
+
+                                    inspectionStatsSummary(response, 'null');
+
+
+                                },
+                            });
+                            inspectionStat.buttons().container().appendTo("#inspectionStatsTbl_wrapper .col-md-6:eq(0)");
+                        }
+                       
+
+                    }
+
+                },
+                error: function (err) {
+                    alertify.error("Error occured. Contact administrator");
+                }
+
+            })
+
+            //For Inspector Code
+            let users = await getUsers();
+            let inspectors = users.filter(user => user.UserRole === "Inspector");
+            let inspectorSelect = $('#inspectorIs');
+            let html = '<option value="null">All</option>';
+            inspectors.forEach((inspector) => {
+                console.log(inspector);
+                if (inspector.UserName) {
+                    html += `<option value="${inspector.UserName}">${inspector.UserName}</option>`;
+                }
+            });
+            inspectorSelect.html(html);
+        } catch (error) {
+            alertify.error(`Error ${error} occured. Contract administrator`);
+        }
+    }
+
+    function populateLogsList(obj) {
+              const userName = [];
+              const user = new Set();
+              const eventSet = new Set();
+              let eventLl = $('#eventLl');
+              let userLl = $('#userLl');
+
+              obj.forEach((ob) => {
+                  if (!user.has(ob.UserId)) {
+                      user.add(ob.UserId);
+                      userName.push({
+                          "UserName": ob.UserName,
+                          "UserId": ob.UserId
+                      });
+                  }
+                  if (!eventSet.has(ob.Event)) {
+                      eventSet.add(ob.Event);
+                  }
+              });
+
+              let html = "<option value='null'> All </option>";
+              userName.forEach((user) => {
+                  html += `<option value="${user.UserId}"> ${user.UserName}</option>`;
+              });
+              userLl.html(html);
+
+              html = "<option value='null'> All </option>";
+              eventSet.forEach((event) => {
+                  html += `<option value="${event}"> ${event}</option>`;
+              });
+              eventLl.html(html);
+          }
+
+
+    function logsListFn() {
+
+        try {
+            $('#logsListTbl').append(`<div class="d-flex justify-content-center  loadingSpinner">
+            <div class="spinner-grow" role="status">
+            <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow" role="status">
+            <span class="sr-only">Loading...</span>
+            </div>
+            </div>`);
+            $.ajax({
+                url: '@Url.Action("GetLogsList", "PartsIq")',
+                method: "GET",
+                success: function (response) {
+                    if (response) {
+                        $(document).find('.loadingSpinner').remove();
+                        if ($.fn.DataTable.isDataTable($("#logsListTbl"))) {
+                            // DataTable already initialized, destroy it
+                            logsListTbl.clear().rows.add(response).draw();
+                        }
+                        else {
+                            logsListTbl = $('#logsListTbl').DataTable({
+                                lengthChange: !1,
+                                buttons: [
+                                    { extend: "copy", className: "btn-light" },
+                                    { extend: "csv", className: "btn-light" },],
+                                columns: [
+                                    {
+                                        data: "DateLog",
+                                        type: "date",
+                                        render: function (data) {
+                                            return parseDateStrTime(data);
+                                        }
+                                    },
+                                    {
+                                        data: "UserName"
+                                    },
+                                    {
+                                        data: "Event"
+                                    },
+                                    {
+                                        data: "LogComment"
+                                    },
+
+                                ],
+                                data: response,
+                                rowId: "LogId",
+                                scrollY: '300px',
+                                searching: false,
+                                order: [[0, 'desc']],
+                                language: {
+                                    paginate: {
+                                        previous: "<i class='mdi mdi-chevron-left'>",
+                                        next: "<i class='mdi mdi-chevron-right'>",
+                                    },
+                                },
+                                drawCallback: function () {
+                                    $(".dataTables_paginate > .pagination").addClass(
+                                        "flat-rounded-pagination"
+                                    ),
+                                        $(".dataTables_filter")
+                                            .find("label")
+                                            .addClass("search-box d-inline-flex position-relative"),
+                                        $(".dataTables_filter")
+                                            .find(".form-control")
+                                            .attr("placeholder", "Search...");
+
+
+                                },
+
+                            });
+                            logsListTbl.buttons().container().appendTo("#logsListTbl_wrapper .col-md-6:eq(0)");
+                        }
+                       
+                        populateLogsList(response);
+                    }
+                },
+                error: function (err) {
+                    alertify.error(`Error ${err} occured. Contact administrator`);
+                }
+            });
+        } catch (error) {
+            alertify.error(`Error ${error} error occured. Contact administrator.`);
+        }
+          }
+
+    $(document).on('click', '#logsListBtn',  function () {
+        logsListFn.call(this);
+    });
+
+    $(document).on('submit', '#logListForm', function (event) {
+        let id = $(this).attr('id');
+        var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary mt-2" id="${id}" disabled>
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Loading...
+    </button>`);
+        var btn = $('#logsListSubmitBtn');
+        btn.replaceWith(loadingBtn);
+        event.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+            url: '@Url.Action("GetLogsList", "PartsIq")',
+            contentType: false,
+            processData: false,
+            data: formData,
+            method: "POST",
+            success: function (response) {
+                if (response && Array.isArray(response)) {
+                    logsListTbl.clear().rows.add(response).draw();
+
+                    window.location.href = `#logsListTbl`;
+                }
+                loadingBtn.replaceWith(btn);
+            },
+            error: function (err) {
+                loadingBtn.replaceWith(btn);
+                alertify.error(`Error ${err} occured. Contact administrator`);
+            }
+        });
+
+    });
+
+    $(document).on('click', '#logsListExportBtn', function (event) {
+
+              let id = $(this).attr('id');
+              var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary" id="${id}" disabled>
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    Loading...
+                    </button>`);
+
+              var form = $('#inspectionStatsForm')[0]; // Get the raw HTML form element
+              var formData = new FormData(form);
+              var btn = $(this).replaceWith(loadingBtn);
+                $.ajax({
+                    url: '@Url.Action("ExportLogsList", "PartsIq")',
+                    method: "POST",
+                    data: formData,
+                    processData: false, // Prevent jQuery from automatically transforming the data into a query string
+                    contentType: false, // Prevent jQuery from overriding the Content-Type header
+                    xhrFields: {
+                        responseType: 'blob' // Set the response type to blob
+                    },
+                    success: function (response, status, xhr) {
+                        loadingBtn.replaceWith(btn);
+                        if (status != 'success') {
+                            alertify.error("Error occurred!");
+                        } else {
+                            alertify.success("File downloaded");
+                            var blob = new Blob([response], { type: xhr.getResponseHeader('Content-Type') });
+                            var link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = `LogsList-${new Date().getTime()}.xlsx`; // Adjust the file name as needed
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        loadingBtn.replaceWith(btn);
+                        alertify.error(`Error ${error} occurred. Contact administrator`);
+                    }
+                    });
+
+          });
+
+    function getNcrList() {
+        try {
+            $.ajax({
+                url: '@Url.Action("GetNcrList", "PartsIq")',
+                success: function (response) {
+                    $(document).find('.loadingSpinner').remove();
+                    if ($.fn.DataTable.isDataTable($("#ncrListTbl"))) {
+                        // DataTable already initialized, destroy it
+                        $("#ncrListTbl").DataTable().destroy();
+                    }
+                    ncrListTbl = $('#ncrListTbl').DataTable({
+                        lengthChange: false,
+                        buttons: [
+                            { extend: "copy", className: "btn-light" },
+                            { extend: "csv", className: "btn-light" }
+                        ],
+                        data: response,
+                        columns: [
+                            { data: "NcrNumber" },
+                            { data: "LotNumber" },
+                            {
+                                data: "DateEnded",
+                                type: "date",
+                                render: function (data) {
+                                    return parseDateStr(data); // Ensure this function is defined elsewhere
+                                }
+                            },
+                            { data: "PartCode" },
+                            { data: "SupplierName" },
+                            {
+                                data: "IsCompleted",
+                                render: function (data) {
+                                    if (data == 0) {
+                                        return "Pending"
+                                    }
+                                    else {
+                                        ""
+                                    }
+                                }
+                            }
+                        ],
+                        rowId: "NcrId",
+                        scrollY: '300px',
+                        responsive: false,
+                        order: [[2, 'desc']],
+                        language: {
+                            paginate: {
+                                previous: "<i class='mdi mdi-chevron-left'></i>",
+                                next: "<i class='mdi mdi-chevron-right'></i>",
+                            },
+                        },
+                        drawCallback: function () {
+                            $(".dataTables_paginate > .pagination").addClass("flat-rounded-pagination");
+                            $(".dataTables_filter").find("label").addClass("search-box d-inline-flex position-relative");
+                            $(".dataTables_filter").find(".form-control").attr("placeholder", "Search...");
+                        },
+                    });
+                },
+                error: function (err) {
+                    alertify.error(`Error ${err.statusText} occurred. Contact administrator.`);
+                }
+            });
+        } catch (error) {
+            alertify.error(`Error ${error.message} occurred. Contact administrator.`);
+        }
+        }
+
+    $(document).on('click', '#ncrListBtn', function () {
+        getNcrList.call(this);
+    });
+          $(document).on('submit', '#ncrListForm', function (event) {
+              event.preventDefault();
+              //let partcoden = $('#partcoden option:selected').val();
+              //let suppliern = $('#suppliern option:selected').val();
+              let id = '#ncrListSubmitBtn';
+              var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary" id="${id}" disabled>
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Loading...
+                </button>`);
+              var btn = $('#ncrListSubmitBtn');
+              btn.replaceWith(loadingBtn);
+              var formData = new FormData(this);
+              $.ajax({
+                  url: '@Url.Action("GetNcrList", "PartsIq")',
+                  method: "POST",
+                  contentType: false,
+                  processData: false,
+                  data: formData,
+                  success: function (response) {
+                      if (response) {
+                          ncrListTbl.clear().rows.add(response).draw();
+                      }                   
+                      loadingBtn.replaceWith(btn);
+                      
+                  }, error: function (err) {
+                      alertify.error(`Error ${err} occured. Contact administrator`);
+                  }
+              });
+          });
+
+          $(document).on('click', '#ncrListExportBtn', function (event) {
+              event.preventDefault();      
+              let id = '#ncrListExportBtn';
+                var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary" id="${id}" disabled>
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Loading...
+                </button>`);
+              var btn = $('#ncrListExportBtn');
+              btn.replaceWith(loadingBtn);
+              var form = $('#ncrListForm')[0];
+              var formData = new FormData(form);
+              $.ajax({
+                  url: '@Url.Action("ExportNcrList", "PartsIq")',
+                  method: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  xhrFields: {
+                      responseType: 'blob' // Set the response type to blob
+                  },
+                  success: function (response, status, xhr) {
+                      if (status != 'success') {
+                          alertify.error("Error occurred!");
+                      } else {
+                          alertify.success("File downloaded");
+                          var blob = new Blob([response], { type: xhr.getResponseHeader('Content-Type') });
+                          var link = document.createElement('a');
+                          link.href = window.URL.createObjectURL(blob);
+                          link.download = `NCR-Report-${new Date().getTime()}.xlsx`; // Adjust the file name as needed
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                      }
+                      loadingBtn.replaceWith(btn);
+                  },
+                  error: function (err) {
+                      loadingBtn.replaceWith(btn);
+                      alertify.error(`Error ${err} occured. Contact administrator`);
+                  }
+              });
+              
+
+          })
+    //For closing of TabPanes
+    $(document).on('click', '.closeTabPane', function () {
+        closeTabPane.call(this);
+    });
+    // For exporting Inspection Result in Excel form
+    $(document).on('click', '.inspectionResultBtn', async function () {
+        exportInspectionResult.call(this);
+    });
+
+    $('#inspectionStatsForm').on('submit', function (event) {
+        let id = $(this).attr('id');
+        var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary" id="${id}" disabled>
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Loading...
+        </button>`);
+        var btn = $('#inspectionStatsBtn');
+        btn.replaceWith(loadingBtn);
+        event.preventDefault();
+        var formData = new FormData(this); // Directly pass the form element to FormData
+        var minMax = $('#minMaxIs option:selected').val();
+        var partCode = $('#partsCodeIs option:selected').val();
+
+        $.ajax({
+            url: '@Url.Action("GetInspectionStatistics", "PartsIq")',
+            contentType: false,
+            processData: false,
+            data: formData,
+            method: "POST",
+            success: function (response) {
+                if (response && Array.isArray(response)) {
+                    if (minMax == 'min') {
+                        let minObj = response.reduce((ac, value) => {
+                            return value.InspectionDuration < ac.InspectionDuration ? value : ac;
+                        }, { InspectionDuration: Number.POSITIVE_INFINITY });
+                        response = [minObj];
+                    }
+                    else if (minMax == 'max') {
+                        let maxObj = response.reduce((ac, value) => {
+                            return value.InspectionDuration > ac.InspectionDuration ? value : ac;
+                        }, { InspectionDuration: Number.NEGATIVE_INFINITY });
+                        response = [maxObj];
+                    }
+                    inspectionStat.clear().rows.add(response).draw();
+                    inspectionStatsSummary(response, partCode);
+
+
+                    window.location.href = `#inspectionStatsTbl`;
+                }
+                else {
+                    alertify.error(`Error occured. Contact administrator`);
+                }
+                loadingBtn.replaceWith(btn);
+            },
+            error: function (error) {
+                alertify.error(`Error ${error}occured. Contact administrator`);
+                loadingBtn.replaceWith(btn);
+            }
+        });
+    });
+    $('#inspectionStatBtn').on('click', function () {
+        inspectionStatistics.call(this);
+    });
+    $(document).on('click', '#inspectionStatsExportBtn', function (event) {
+    event.preventDefault();
+
+    let id = $(this).attr('id');
+    var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary" id="${id}" disabled>
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Loading...
+    </button>`);
+    var btn = $(this).replaceWith(loadingBtn);
+
+    var form = $('#inspectionStatsForm')[0]; // Get the raw HTML form element
+    var formData = new FormData(form); // Initialize FormData with the form element
+
+    $.ajax({
+        url: '@Url.Action("ExportInspectionStats", "PartsIq")',
+        method: "POST",
+        data: formData,
+        processData: false, // Prevent jQuery from automatically transforming the data into a query string
+        contentType: false, // Prevent jQuery from overriding the Content-Type header
+        xhrFields: {
+            responseType: 'blob' // Set the response type to blob
+        },
+        success: function (response, status, xhr) {
+            loadingBtn.replaceWith(btn);
+            if (status != 'success') {
+                alertify.error("Error occurred!");
+            } else {
+                alertify.success("File downloaded");
+                var blob = new Blob([response], { type: xhr.getResponseHeader('Content-Type') });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = `InspectionStats-${new Date().getTime()}.xlsx`; // Adjust the file name as needed
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        },
+        error: function (xhr, status, error) {
+            loadingBtn.replaceWith(btn);
+            alertify.error(`Error ${error} occurred. Contact administrator`);
+        }
+    });
+});
+
+    $(document).on('click', '#nonconformityExportBtn', function () {
+        //Loading Btn
+        let id = $(this).attr('id');
+        var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary inspectionInfo" id="${id}" disabled>
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Loading...
+          </button>`);
+        var btn = $(this);
+
+        btn.replaceWith(loadingBtn);
+
+    var decision = $(this).data('decision');
+    var supplierName = $(this).data('suppliername');
+    var lotNumber = $(this).data('lotnumber');
+    var partCode = $(this).data('partcode');
+    var partName = $(this).data('partname');
+    var drNumber = $(this).data('drnumber');
+    var lotQuantity = $(this).data('lotquantity');
+    var supplierInCharge = $(this).data('supplierincharge');
+    let inspectionId = $(this).data('id');
+
+    var objTemp = {
+        SupplierName: supplierName,
+        PartsCode: partCode,
+        LotNumber: lotNumber,
+        PartName: partName,
+        DrNumber: drNumber,
+        LotQuantity: lotQuantity,
+        InspectionId: inspectionId,
+        SupplierInCharge: ""
+            };
+
+
+
+
+    var formData = new FormData();
+            formData.append("formData", JSON.stringify(objTemp));
+            formData.append("nRemarks", $('#nonconformityTextarea').val());
+            formData.append("nControl", $('#nonconformityControl').val());
+
+
+    $.ajax({
+        url: '@Url.Action("ExportNonConformityReport", "PartsIq")',
+        method: "POST",
+        data: formData,
+        processData: false, // Prevent jQuery from automatically transforming the data into a query string
+        contentType: false, // Prevent jQuery from overriding the Content-Type header
+        xhrFields: {
+            responseType: 'blob' // Set the response type to blob
+        },
+        success: function (response, status, xhr) {
+            loadingBtn.replaceWith(btn);
+            console.log(response);
+            if (status != 'success') {
+                alertify.error("Error occured!");
+            }
+            else {
+                alertify.success("File downloaded");
+                var blob = new Blob([response], { type: xhr.getResponseHeader('Content-Type') });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = `NCR-${inspectionId}.xlsx`; // Adjust the file name as needed
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+        },
+        error: function (xhr, status, error) {
+
+            if (decision == "Accept" || decision == "Pending") {
+
+                alertify.warning("There is no rejects");
+
+            }
+            else {
+                alertify.error(`Error ${error} occured. Contact Administrator`)
+                console.error("Error occurred: ", status, error);
+           }
+
+            loadingBtn.replaceWith(btn);
+        }
+    });
+});
+
+    $('#supplierBtn').on('click', function () {
+
+                    //For Supplier Select Input
+            $.ajax({
+                url: '@Url.Action("GetSuppliers", "PartsIq")',
+                method: "Get",
+                async: true,
+                success: function (response) {
+                    suppliers = response;
+                    let html = '';
+                    html += '<option value="null" selected>Select </option>'
+                    suppliers.forEach((supplier, index) => {
+                        html += `<option value= ${supplier.Id}> ${supplier.Name} </option>`
+                    });
+                    $(document).find('#supplierP').each(function () {
+                        $(this).html(html);
+                    });
+                }
+            });
+
+
+
+            let html = '';
+            let htmlTabContent = '';
+
+            let partInfoTab = $(document).find(".partInfoTab");
+            let partInfoTabContent = $(document).find(".partInfoTabContent");
+
+            var checkExisting = $(document).find($(`#supplierPerformance-test`));
+
+            if (checkExisting.length == 0) {
+                html += `<li class="nav-item" id="supplierPerformance-test">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="#TabSupplierPerformance" id="supplierPerformance-tab" data-bs-toggle="tab" role="tab" aria-expanded="false" class="nav-link">Supplier Performance
+                                </a>
+                                <i class="mdi mdi-close-thick closeTabPane" data-id="#TabSupplierPerformance" style="cursor: pointer;"></i>
+                                </li>
+                            </div> `;
+
+                partInfoTab.append(html);
+                htmlTabContent += ` <div class="tab-pane" role="tabpane" aria-labelledby="supplierPerformance-tab" id="TabSupplierPerformance">
+                                        <div class="card">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="card-title">Supplier Performance</h5>
+
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="supplierPerformanceForm">
+                                                    <div class="row border border-1 round fs-12" autocomplete="off">
+
+                                                        <div class="col-md-6 mt-2">
+                                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                                <label for="supplierP" class="fw-bolder ">Supplier</label>
+                                                                <select type="text" id="supplierP" name="SupplierId" class="form-control form-control-sm supplierSelect" required>
+                                                                    <option selected> Please Wait...</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                                <label for="fromDateP" class="fw-bolder">From</label>
+                                                                <input type="date" id="fromDateP" name="DateFrom" class="form-control form-control-sm fromDate" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6 mt-2">
+                                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                                <label for="partCodeP" class="fw-bolder">Part Code</label>
+                                                                <input type="text" name="PartCode" id="partCodeP" class="form-control form-control-sm">
+                                                            </div>
+                                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                                <label for="toDateP" class="fw-bolder">To</label>
+                                                                <input type="date" name="DateTo" id="toDateP" class="form-control form-control-sm toDate" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-center mb-2">
+                                                            <button id="supplierPerformanceSearch" type="submit" class="btn btn-primary btn-sm">Search</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-xl-12 mt-3 mt-xl-0">
+                                                    <div class="card-body">
+                                                        <div id="supplierPerformanceSummary">
+
+                                                        </div>
+
+                                                        <div class="border border-1 border round fs-12 shadow-sm rounded">
+                                                            <div class="table-responsive">
+                                                                <table id="supplierTable" class="nowrap table-striped w-100 text-center">
+                                                                    <thead class="table-light">
+                                                                        <tr>
+                                                                            <th>
+                                                                                Date Finished
+                                                                            </th>
+                                                                            <th>
+                                                                                Decision
+                                                                            </th>
+                                                                            <th>
+                                                                                Part Code
+                                                                            </th>
+                                                                            <th>
+                                                                                Supplier
+                                                                            </th>
+                                                                            <th>
+                                                                                Lot Number
+                                                                            </th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                </table>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col-sm-12 col-xl-12 m-2 text-center">
+                                                            <button type="button" class="btn btn-primary btn-sm" id="supplierPerformanceBtn" disabled>
+                                                                Download
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>`;
+
+                partInfoTabContent.append(htmlTabContent);
+            }
+                let supplierHtml = '';
+            supplierHtml += '<option value="null" selected>Select </option>'
+                suppliers.forEach((supplier, index) => {
+                    supplierHtml += `<option value= ${supplier.Id}> ${supplier.Name} </option>`
+                });
+            $(document).find('#supplierP').each(function () {
+                    $(this).html(supplierHtml);
+                });
+            $('#partInformation').show();
+
+            var href = `#partInformation`;
+            var element = document.querySelector(href);
+            if (element) {
+                // Calculate the position of the element relative to the viewport
+                var y = element.getBoundingClientRect().top + window.scrollY;
+                // Scroll to the element smoothly
+                window.scrollTo({
+                    top: y,
+                    behavior: 'smooth'
+                });
+            }
+            let x = $(document).find(`#supplierPerformance-tab`);
+        x.trigger('click');
+
+        adjustColumn();
+        });
+
+    $(document).on('click', '#supplierPerformanceBtn', function () {
+        var groupedData = {};
+                            supplierObj.forEach((ob) => {
+                                var decision = ob.Decision;
+                                if (!groupedData.hasOwnProperty(decision)) {
+                                    switch (decision) {
+                                        case 'Sort Out':
+                                            decision = 'SortOut';
+                                            break;
+                                        case 'Special Accept':
+                                            decision = 'SpecialAccept';
+                                            break;
+
+                                    }
+                                    groupedData[decision] = {};
+                                }
+
+                                const partCode = ob.PartsCode;
+                                if (!groupedData[decision].hasOwnProperty(partCode)) {
+                                    groupedData[decision][partCode] = {
+                                        PartName: ob.PartName,
+                                        NcrCount: 0
+                                    };
+                                }
+
+                                if (ob.NcrNumber !== null) {
+                                    groupedData[decision][partCode].NcrCount += 1;
+                                }
+                            });
+                            var formData = new FormData();
+                            var jsonData = JSON.stringify(groupedData);
+                            formData.append('partData', JSON.stringify(groupedData));
+                            formData.append('accept', supplierObj.accept);
+                            formData.append('reject', supplierObj.reject);
+                            formData.append('sAccept', supplierObj.sAccept);
+                            formData.append('sortOut', supplierObj.sortOut);
+                            formData.append('total', supplierObj.total);
+                            formData.append('fromDate', $('#fromDateP').val());
+                            formData.append('toDate', $('#toDateP').val());
+                            formData.append('supplier', supplierObj.supplier);
+
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("ExportSupplierPerformance", "PartsIq")',
+                                contentType: false,
+                                processData: false,
+                            // Set content type to JSON
+                                data: formData,
+                                xhrFields: {
+                                    responseType: 'blob' // Set the response type to blob
+                                },
+                                success: function (blob, status, xhr) {
+
+                                    console.log(status)
+                                    if (status != 'success') {
+                                        alertify.error("Error encountered");
+                                        return;
+                                    }
+                                    else {
+                                        alertify.success("File downloaded");
+                                        var contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                                        var filename = `${supplierObj.supplier}.xlsx`; // Default filename
+                                        if (contentDisposition) {
+                                            var match = contentDisposition.match(/filename="(.+)"/);
+                                            if (match) {
+                                                filename = match[1];
+                                            }
+                                        }
+
+                                        var url = window.URL.createObjectURL(blob);
+                                        var a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = filename;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                        window.URL.revokeObjectURL(url);
+                                    }
+
+
+
+                                },
+                                error: function (error) {
+                                console.error(error);
+                                }
+                            });
+
+ });
+
+    $(document).on('click', '#closeSupplier', function () {
+            let cols = $('#mainContent').find('.sub-content');
+            cols.each(function (index) {
+                if (index == 1) {
+                    $(this).hide();
+                }
+                $(this).removeClass('col-md-6').addClass('col-md-12');
+            });
+        });
+
+    $(document).on('submit', '#supplierPerformanceForm', function (event) {
+
+            $('#supplierPerformanceBtn').prop("disabled", true);
+                var btn = $('#supplierPerformanceSearch');
+                var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary"  id="#supplierPerformanceSearch" disabled>
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                        Loading...
+                                    </button>`);
+
+                btn.replaceWith(loadingBtn);
+                event.preventDefault();
+                let supplierSelect = $('#supplierP');
+                if (supplierSelect.val() === null || supplierSelect.val() === '' || supplierSelect.val() === "null") {
+                            alertify.error('Please select a supplier.');
+                            supplierSelect.focus();
+                            loadingBtn.replaceWith(btn);
+                            return false;
+                }
+                else if ($('#fromDateP').val() > $('#toDateP').val()) {
+                    alertify.error('Please select a valid date range.');
+                    loadingBtn.replaceWith(btn);
+                    return false;
+                }
+
+                else {
+
+                    var formData = new FormData($(this)[0]);
+    
+                    $.ajax({
+                type: "POST",
+                url: '@Url.Action("SupplierPerformance", "PartsIq")',
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    $('#supplierPerformanceBtn').prop("disabled", false);
+                loadingBtn.replaceWith(btn);
+
+
+                    supplierObj = response;
+
+
+                    supplierObj.supplier = $('#supplierP option:selected').text();
+                    if ($.fn.DataTable.isDataTable($("#supplierTable"))) {
+                        // DataTable already initialized, destroy it
+                        $("#supplierTable").DataTable().destroy();
+                    }
+
+                        let supplierTable = $("#supplierTable").DataTable({
+                            data: response,
+                            lengthChange: false,
+                            buttons: [
+                                { extend: "copy", className: "btn-light" },
+                                { extend: "csv", className: "btn-light" },
+                            ],
+                            columns: [
+                                {
+                                    data: "DateFinished",
+                                    render: function (data) {
+                                        return parseDateStr(data);
+                                    }
+                                },
+                                { data: "Decision" },
+                                { data: "PartsCode" },
+                                { data: "SupplierName" },
+                                { data: "LotNumber" },
+                            ],
+                            scrollX: !0,
+                            responsive: true,
+                            searching: false,
+                            language: {
+                                paginate: {
+                                    previous: "<i class='mdi mdi-chevron-left'>",
+                                    next: "<i class='mdi mdi-chevron-right'>",
+                                },
+                            },
+                            drawCallback: function () {
+                                $(".dataTables_paginate > .pagination").addClass(
+                                    "flat-rounded-pagination"
+                                ),
+                                    $(".dataTables_filter")
+                                        .find("label")
+                                        .addClass("search-box d-inline-flex position-relative"),
+                                    $(".dataTables_filter")
+                                        .find(".form-control")
+                                        .attr("placeholder", "Search...");
+                            },
+                        });
+
+                    supplierTable.buttons().container().appendTo("#supplierTable_wrapper .col-md-6:eq(0)");
+                    let supplier = $(document).find('#supplierPerformanceSummary');
+                    let total = response.length,
+                        totalAccept = 0,
+                        specialAccept = 0,
+                        sortOut = 0,
+                        reject = 0;
+
+
+
+                    // Loop through the response array and tally up the counts
+                    response.forEach((inspection, index) => {
+                        switch (inspection.Decision) {
+                            case "Accept":
+                                totalAccept++;
+                                break;
+                            case "Special Accept":
+                                specialAccept++;
+                                break;
+                            case "Sort out":
+                                sortOut++;
+                                break;
+                            case "Reject":
+                                reject++;
+                                break;
+                        }
+                    });
+                    if (total <= 0) {
+                        supplierObj.total = 0;
+                        supplierObj.accept = 0;
+                        supplierObj.sAccept = 0;
+                        supplierObj.sortOut = 0;
+                        supplierObj.reject = 0;
+
+                    } else {
+                        supplierObj.total = total;
+                        supplierObj.accept = ((totalAccept / total) * 100).toFixed(2);
+                        supplierObj.sAccept = ((specialAccept / total) * 100).toFixed(2);
+                        supplierObj.sortOut = ((sortOut / total) * 100).toFixed(2);
+                        supplierObj.reject = ((reject / total) * 100).toFixed(2);
+                    }
+
+
+                    let htmlS = '';
+
+                    htmlS += `
+                        <ul class="list-unstyled fw-bolder fs-12 text-center">
+                            <li>
+                            % of Accept Inspection : ${supplierObj.accept}%
+                            </li>
+                            <li>
+                            % of Special Accept Inspection : ${supplierObj.sAccept}%
+                            </li>
+                            <li>
+                            % of Sort Out Inspection : ${supplierObj.sortOut}%
+                            </li>
+                            <li>
+                            % of RejectInspection : ${supplierObj.reject}%
+                            </li>
+                        </ul>
+                        <h5 class="fw-bolder">Total Number of Inspections: ${(total)}</h5>
+                    `;
+                    supplier.html(htmlS);
+                },
+                error: function (response) {
+                    $('#supplierPerformanceBtn').prop('disabled', false);
+                    alert('Please make sure Supplier is not Null')
+                }
+            });
+                }
+
+
+        });
+
+    $(document).on('change', '.selectCheckpointInfo', function () {
+
+            function stdDev(obj) {
+                const annotation = {};
+
+                // Calculate mean
+                const data = obj.map(ob => ob.Measurement);
+                const mean = data.reduce((acc, val) => acc + val, 0) / data.length;
+
+
+                // Calculate standard deviation
+                const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
+                const variance = squaredDifferences.reduce((acc, val) => acc + val, 0) / (data.length - 1);
+                const standardDeviation = Math.sqrt(variance);
+
+                // Assign calculated values to annotation object
+                annotation["stdv"] = standardDeviation;
+                annotation["avg"] = mean;
+
+                return annotation;
+            }
+
+            let checkpointId = $(this).val();
+            let inspectionId = $(this).data('inspectionid')
+            let selectedOption = $(this).find(':selected');
+            let lowerLimit = selectedOption.data('lowerlimit');
+            let upperLimit = selectedOption.data('upperlimit');
+            $.ajax({
+                url: '@Url.Action("GetInspectionCheckpoints", "PartsIq")',
+                method: "GET",
+                data: {
+                    checkpointId: checkpointId,
+                    inspectionId : inspectionId
+                },
+                success: function (response) {
+                    let filter = $(document).find('.filterNg');
+                    if (filter.is(':checked')) {
+                        response = response.filter((res) => {
+                            return res.IsGood === false
+                        });
+                    }
+                    $(document).find(`#Tab${inspectionId} .lowerLimitSpan`);
+
+                    $(document).find(`#Tab${inspectionId} .lowerLimitSpan`).text(lowerLimit);
+                    $(document).find(`#Tab${inspectionId} .upperLimitSpan`).text(upperLimit);
+                    let html = '';
+                    html += `
+                    <div class="table-container">
+                    <table class="table fs-12">
+                                                            <thead>
+                                                            <tr>
+                                                            <th>Sample Number</th>
+                                                            <th>Cavity Number</th>
+                                                            <th>Measurement/Attribute</th>
+                                                            <th>Original Measurement</th>
+                                                            <th>Judgement</th>
+                                                            </tr>
+                                                            </thead>`;
+                    html += `<tbody>`;
+                    let minMeasurement = response.length > 0 ? response[0].Measurement : 0;
+                    let maxMeasurement = response.length > 0 ? response[0].Measurement : 0;
+                    response.forEach((checkpoint, index) => {
+                        var textColor = checkpoint.IsGood == 1 ? "" : "text-danger";
+                        if (checkpoint.Measurement < minMeasurement) {
+                            minMeasurement = checkpoint.Measurement;
+                        }
+                        if (checkpoint.Measurement > maxMeasurement) {
+                            maxMeasurement = checkpoint.Measurement;
+                        }
+                        html += `<tr>
+                        <td class= ${textColor}> ${checkpoint.SampleNumber} </td>
+                        <td class= ${textColor}> ${checkpoint.CavityNumber} </td>
+                        <td class= ${textColor}> ${(checkpoint.MeasurementAttr.length > 0) ? checkpoint.MeasurementAttr : checkpoint.Measurement} </td>
+                        <td class= ${textColor}> ${checkpoint.OrigMeasurement} </td>
+                        <td class= ${textColor}> ${checkpoint.IsGood? "Good" : "Not Good"} </td>
+                        </tr>` ;
+                    });
+                    html += '</tbody> </table> </div>';
+                    let x = $(document).find(`#Tab${inspectionId} .checkpointTable`);
+
+
+                    html += `<div class="mt-3 d-flex justify-content-evenly">
+                        <h6 class="fw-bolder"> <span class="badge bg-info"> Max Value:  </span>  ${maxMeasurement}</h6>
+                        <h6 class="fw-bolder"> <span class="badge bg-info"> Min Value:  </span>  ${minMeasurement}</h6>
+                        <h6 class="fw-bolder"> <span class="badge bg-info"> Standard Deviation:  </span>  ${stdDev(response).stdv.toFixed(4)}</h6>
+
+                        </div>`;
+                    x.html(html)
+                    let checkpointTable = $('.checkpointTableTbl').DataTable();
+                    checkpointTable.searching = false;
+
+
+
+                }
+            });
+        });
+
+    $('#inspectionFilterForm').on('submit', function (event) {
+    event.preventDefault();
+    var btn = $('#inspectionFilterForm button[type="submit"]')
+    var formData = new FormData($(this)[0]);
+    var loadingBtn = $('<button class="btn btn-primary btn-sm" type="button" disabled><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Loading...</button>');
+    btn.replaceWith(loadingBtn)
+
+    $.ajax({
+    type: "POST",
+    url: '@Url.Action("InspectionSummaryFilter", "PartsIq")',
+    contentType: false,
+    processData: false,
+    data: formData,
+    success: function (response) {
+        loadingBtn.replaceWith(btn)
+        // Check if response is valid JSON
+        if (response && Array.isArray(response)) {
+            // Update reportSummaryJson with filtered data
+            reportSummaryJson = response;
+            // Reload the DataTable with the new data
+            reportSummary.clear().rows.add(reportSummaryJson).draw();
+            window.location.href = `#reportSummary`;
+        } else {
+            // Handle invalid response or unexpected data format
+            console.error("Invalid response or unexpected data format");
+        }
+    },
+    error: function (xhr, status, error) {
+        // Handle AJAX errors
+        console.error("AJAX error:", error);
+    }
+    });
+    });
+
+    $('#partPerformanceForm').on('submit', function (event) {
+        event.preventDefault();
+        var formData = new FormData($(this)[0]);
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("InspectionSummaryFilter", "PartsIq")',
+            dataType: 'json',
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function (response) {
+                // Check if response is valid JSON
+                    if (response && Array.isArray(response)) {
+                        // Update reportSummaryJson with filtered data
+                        reportSummaryJson = response;
+                        // Reload the DataTable with the new data
+                        reportSummary.clear().rows.add(reportSummaryJson).draw();
+                        window.location.href = `#reportSummary`;
+                    } else {
+                        // Handle invalid response or unexpected data format
+                        console.error("Invalid response or unexpected data format");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle AJAX errors
+                    alertify.error(`Error ${error} occured. Contact administrator`);
+                                                        }
+                });
+    });
+
+    $(document).on('change', '#partsCodePa', function () {
+        //Destroy Charts
+        if (xChart !== null) {
+            xChart.destroy();
+            mrChart.destroy();
+            $('#plotXChart').prop("disabled", true);
+            $('#plotRChart').prop("disabled", true);
+            $('#reportButton').prop("disabled", true);
+
+        }
+        if (rChart != null) {
+            rChart.destroy();
+        }
+
+        $('#partPerformanceTable').bootstrapTable('destroy');
+    suppliers = "";
+
+        let partId = $(this).val();
+        if (partId == null || partId == "null") {
+            alertify.error("Select a valid parts code");
+            return;
+        }
+    var supplierInp = $('#supplierPa');
+
+    var searchVBtn = $('#partPerformanceBtn').prop('disabled', true);
+
+    var loading = $(`
+        <div class="spinner-border m-2" role = "status" >
+            <span class="sr-only">Loading...</span>
+            </div >
+    `);
+    supplierInp.replaceWith(loading);
+
+
+    $.ajax({
+        url: '@Url.Action("SupplierForPart", "PartsIq")',
+        method: "GET",
+        data: {
+            partId: partId
+        },
+        success: function (response) {
+            searchVBtn.prop('disabled', false);
+            loading.replaceWith(supplierInp);
+            $('#supplierPa').empty();
+            $('#checkpointPa').empty();
+            suppliers = response.Suppliers
+            checkpoints = response.CheckPoints;
+            if (suppliers.length <= 0) {
+                alertify.error("No suppliers recorded at the given date range");
+                return;
+            }
+
+            $('#partNamePart').val(suppliers[0].PartName);
+            $('#partModelPart').val(suppliers[0].PartModel);
+            $('#partSpecPart').val(checkpoints[0].Specification);
+            function parseDate(rawDate) {
+                var date = new Date(parseInt(rawDate.substr(6))); // Convert Unix timestamp to milliseconds
+                var year = date.getFullYear();
+                var month = ('0' + (date.getMonth() + 1)).slice(-2); // Add leading zero if necessary
+                var day = ('0' + date.getDate()).slice(-2); // Add leading zero if necessary
+                return year + '-' + month + '-' + day;
+            }
+
+            $('#supplierPa').append('<option value=null selected>Select</option>');
+            $.each(suppliers, function (index, supplier) {
+                if ($('#supplierPa option[value="' + supplier.SupplierId + '"]').length === 0) {
+                    // If not, append it to the dropdown
+                    $('#supplierPa').append($('<option>', {
+                        text: supplier.SupplierName,
+                        value: supplier.SupplierId
+                    }));
+                }
+            });
+
+            $.each(checkpoints, function (index, checkpoint) {
+                $('#checkpointPa').append($('<option>', {
+                    text: checkpoint.CCode,
+                    value: checkpoint.CheckpointId
+                }));
+            });
+
+            $(document).on('change', '#checkpointPa', function () {
+                let checkpointId = $(this).val();
+                let checkpoint = checkpoints.find(checkpoint => checkpoint.CheckpointId == checkpointId);
+                $('#partSpecPart').val(formatSpecification(checkpoint.Specification))
+            });
+
+
+        }
+    });
+
+
+});
+
+    $(document).on('click', '#plotRChart', async function () {
+
+            var isRChart = false;
+            function getMinMax(obj) {
+                var min;
+                var max;
+                if (obj.length === 0) {
+                    return { min: 0, max: 0 };
+                }
+
+                let yMin = obj[0].specs.lowerLimit;
+                let yMax = obj[0].specs.upperLimit;
+
+                obj.forEach((el) => {
+                    if (yMin > el.specs.lowerLimit) {
+                        yMin = el.specs.lowerLimit;
+                    }
+                    if (yMax < el.specs.upperLimit) {
+                        yMax = el.specs.upperLimit;
+                    }
+                });
+
+                return { min: yMin, max: yMax };
+            }
+
+
+        const selections = $('#partPerformanceTable').bootstrapTable('getSelections');
+
+        if (selections.length <= 0) {
+            alertify.error("Please select a lot before plotting a chart");
+            return;
+        }
+        $('#xChart').hide();
+        $('#mrChart').hide();
+        $('#rChart').show();
+        $('#reportButton').prop('disabled', false);
+        $('#reportButton').attr('data-action', 'downloadPartPerformanceR');
+        const cavityNumber = $('#cavityNumberPa option:selected').text();
+        const checkPointId = $('#checkpointPa').val();
+        const ajaxPromises = selections.map((selection, index) => {
+        const name = selection.LotNumber;
+        var InspectionId = selection.InspectionId
+
+
+                partPerformanceObj.partCode = $('#partsCodePa option:selected').text();
+                partPerformanceObj.supplier = $('#supplierPa option:selected').text();
+                partPerformanceObj.fromDate = $('#fromDatePa').val();
+                partPerformanceObj.toDate = $('#toDatePa').val();
+                partPerformanceObj.cavity = $('#cavityNumberPa option:selected').text();
+
+
+                partPerformanceObj.checkpoint = $('#checkpointPa option:selected').text();
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                async: true,
+                url: '@Url.Action("GetInspectionCheckpoints", "PartsIq")',
+                method: "GET",
+                data: {
+                    inspectionId: InspectionId,
+                    checkpointId: checkPointId
+                },
+                success: (inspectionData) => {
+
+                    if (cavityNumber != "All") {
+                        inspectionData = inspectionData.filter(data => data.CavityNumber == cavityNumber);
+                    }
+                    annoData = inspectionData
+                    // Group inspectionData by CavityNumber
+                    const groupedData = inspectionData.reduce((acc, obj) => {
+                        const { CavityNumber } = obj;
+                        if (!acc[CavityNumber]) {
+                            acc[CavityNumber] = [];
+                        }
+                        acc[CavityNumber].push(obj);
+                        return acc;
+                    }, {});
+                    let runningIndex = 1;
+                    // Map grouped data to get x and y values
+                    const data = Object.entries(groupedData).map(([cavityNumber, group], index) => {
+                        var lowerLimit;
+                        var upperLimit;
+                        const seriesData = group.map((data, i) => {
+                            lowerLimit = data.LowerLimit;
+                            upperLimit = data.UpperLimit;
+                            return { x: runningIndex + i, y: data.Measurement };
+                        });
+                        runningIndex += group.length; // Update the running index for the next series
+                        return {
+                            name: `Cavity ${cavityNumber}`,
+                            data: seriesData,
+                            specs: { "lowerLimit": lowerLimit, "upperLimit": upperLimit }
+
+
+
+                        };
+                    });
+                    const columns = inspectionData.map(({ SampleNumber }) => SampleNumber);
+                    resolve({ name, data, columns });
+                },
+                error: (xhr, status, error) => {
+                    reject(error);
+                }
+            });
+        });
+    });
+            let graphs = await Promise.all(ajaxPromises);
+            if (graphs.length > 1) {
+                isRChart = true;
+            }
+        let groupedData = [];
+        let columns = [];
+        let xAnnotation = [];
+        var yAnnotation = []
+
+        graphs.forEach((lot) => {
+            // Iterate over each cavity in the lot
+            lot.data.forEach((cavity) => {
+                let cavityName = cavity.name;
+                let cavityData = [];
+                let specs = cavity.specs;
+
+                // Iterate over each data point in the cavity and push them into cavityData
+                cavity.data.forEach((datum) => {
+                    cavityData.push({ x: datum.x, y: parseFloat(datum.y) });
+                });
+
+                // Push the complete data for the cavity into groupedData
+                groupedData.push({ lot: lot.name, name: cavityName, data: cavityData, specs: specs });
+
+
+            });
+        });
+            groupedData.sort((a, b) => a.name.localeCompare(b.name));
+            let runningNumbers = {};
+            let groupedByCavity = groupedData.reduce((acc, cavity) => {
+                if (!acc[cavity.name]) {
+                    acc[cavity.name] = {
+                        name: cavity.name,
+                        data: [],
+                        specs: cavity.specs
+                    };
+                }
+                acc[cavity.name].data = acc[cavity.name].data.concat(cavity.data);
+                return acc;
+            }, {});
+
+            console.log(groupedByCavity)
+
+            let sorted = Object.keys(groupedByCavity).map((cavityName) => {
+                let runningNumber = runningNumbers[cavityName] || 0;
+                let cavityData = [];
+                let specs = groupedByCavity[cavityName].specs;
+
+                groupedByCavity[cavityName].data.forEach((datum) => {
+                    cavityData.push({ x: runningNumber, y: parseFloat(datum.y) }); // Use running number
+                    columns.push(runningNumber);
+                    runningNumber++; // Increment running number after assigning it
+                });
+
+                runningNumbers[cavityName] = runningNumber; // Update running number for this cavity
+
+                xAnnotation.push({
+                    x: runningNumber, // This will be the next running number
+                    cavity: cavityName,
+                    borderColor: '#775DD0',
+                    label: {
+                        style: {
+                            color: 'black',
+                        },
+                        text: cavityName
+                    }
+                });
+
+                return {label:cavityName, cavity: cavityName, data: cavityData, specs: specs };
+            });
+
+            partPerformanceObj.lowerLimit = sorted[0].specs.lowerLimit;
+            partPerformanceObj.upperLimit = sorted[0].specs.upperLimit;
+
+
+
+        columns.unshift(0)
+        console.log(columns)
+        var minMax = getMinMax(sorted);
+        sorted.forEach((x) => {
+            var y = {
+                y: 1.84,
+                borderColor: '#775DD4',
+                width: `${(x.data.length / columns.length) * 100}%`,
+                label: {
+                    style: {
+                        color: 'black',
+                    },
+                    text: `${x.name}`
+                }
+
+            }
+            yAnnotation.push(y);
+        });
+
+
+        const yAnnotations = getAnnotations(sorted);
+            limits = yAnnotations.map((cavity) => {
+                return {
+                    "cavity": cavity.name,
+                    "iChart":
+                    {
+                        "lcl": cavity.annotations.iChart.lcl,
+                        "ucl": cavity.annotations.iChart.lcl,
+                    },
+                    "xBarChart":
+                    {
+                        "lcl": cavity.annotations.xBarChart.lcl,
+                        "ucl": cavity.annotations.xBarChart.lcl,
+                    },
+                    "rChart":
+                    {
+                        "lcl": cavity.annotations.rChart.lcl,
+                        "ucl": cavity.annotations.rChart.lcl,
+                    },
+                    "mrChart":
+                    {
+                        "lcl": cavity.annotations.mrChart.lcl,
+                        "ucl": cavity.annotations.mrChart.ucl,
+                    },
+
+                }
+            });
+            console.log(sorted);
+            const options = {
+                responsive: !0,
+                maintainAspectRatio: !1,
+                legend: { display: !1 },
+                tooltips: { intersect: !1 },
+                hover: { intersect: !0 },
+                plugins: { filler: { propagate: !1 } },
+                scales: {
+                    x: {
+                        display: isRChart? false: true,
+                        grid: {
+                            display: false,
+                        }
+                    }
+                    //y: {
+                    //    suggestedMin: minMax.min * 1.1,
+                    //    suggestedMin: (minMax.min * 1.1) - 1,
+
+                    //}
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: !isRChart ? "xBar CHART" : 'Cavity Relation CHART'
+                    }
+                }
+            };
+
+
+            const ctx = document.getElementById('rChart').getContext('2d');
+
+            const data = {
+                labels: columns,
+                datasets: sorted
+            };
+            const config = {
+                type: 'line',
+                data: data,
+                options: options,
+
+            }
+            if (rChart !== null) {
+                rChart.destroy();
+            }
+
+            rChart = new Chart(
+                ctx, config
+            )
+
+        });
+
+    $(document).on('click', '#plotXChart', async function () {
+
+
+              function consolidateDataByLot(data) {
+                  const consolidatedData = {};
+
+                  data.forEach(({ name, data: cavityData, columns }) => {
+                      if (!consolidatedData[name]) {
+                          consolidatedData[name] = { name, data: [], columns };
+                      }
+
+                      cavityData.forEach(cavity => {
+                          consolidatedData[name].data = consolidatedData[name].data.concat(cavity);
+                      });
+                  });
+
+                  return Object.values(consolidatedData);
+              }
+              function getMinMax(obj) {
+                  var min;
+                  var max;
+                  if (obj.length === 0) {
+                      return { min: 0, max: 0 };
+                  }
+
+                  let yMin = obj[0].specs.lowerLimit;
+                  let yMax = obj[0].specs.upperLimit;
+
+                  obj.forEach((el) => {
+                      if (yMin > el.specs.lowerLimit) {
+                          yMin = el.specs.lowerLimit;
+                      }
+                      if (yMax < el.specs.upperLimit) {
+                          yMax = el.specs.upperLimit;
+                      }
+                  });
+
+                  return { min: yMin, max: yMax };
+              }
+              function getLastIndexByName(array, name) {
+                  for (let i = array.length - 1; i >= 0; i--) {
+                      if (array[i].cavity === name) {
+                          return i;
+                      }
+                  }
+                  return -1;
+              }
+
+              function getFirstIndexByName(array, name) {
+                  return array.findIndex(item => item.cavity === name);
+              }
+
+              var isRChart = false;
+              const checkPointId = $('#checkpointPa').val();
+              const selections = $('#partPerformanceTable').bootstrapTable('getSelections');
+              const cavityNumber = $('#cavityNumberPa option:selected').text();
+
+              if (selections.length <= 0) {
+                  alertify.error("Please select a lot before plotting a chart");
+                  return;
+              }
+              $('#xChart').show();
+              $('#mrChart').show();
+              $('#rChart').hide();
+              $('#reportButton').prop('disabled', false);
+              $('#reportButton').attr('data-action', 'downloadPartPerformance');
+
+            partPerformanceObj.partCode = $('#partsCodePa option:selected').text();
+            partPerformanceObj.supplier = $('#supplierPa option:selected').text();
+            partPerformanceObj.fromDate = $('#fromDatePa').val();
+            partPerformanceObj.toDate = $('#toDatePa').val();
+            partPerformanceObj.cavity = $('#cavityNumberPa option:selected').text();
+            partPerformanceObj.checkpoint = $('#checkpointPa option:selected').text();
+
+
+
+            const ajaxPromises = selections.map((selection, index) => {
+                const name = selection.LotNumber;
+                var InspectionId = selection.InspectionId
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        async: true,
+                        url: '@Url.Action("GetInspectionCheckpoints", "PartsIq")',
+                        method: "GET",
+                        data: {
+                            inspectionId: InspectionId,
+                            checkpointId: checkPointId
+                        },
+                        success: (inspectionData) => {
+
+                            if (cavityNumber != "All") {
+                                inspectionData = inspectionData.filter(data => data.CavityNumber == cavityNumber);
+                            }
+                            annoData = inspectionData
+                            // Group inspectionData by CavityNumber
+                            const groupedData = inspectionData.reduce((acc, obj) => {
+                                const { CavityNumber } = obj;
+                                if (!acc[CavityNumber]) {
+                                    acc[CavityNumber] = [];
+                                }
+                                acc[CavityNumber].push(obj);
+                                return acc;
+                            }, {});
+                            let runningIndex = 1;
+                            // Map grouped data to get x and y values
+                            const data = Object.entries(groupedData).map(([cavityNumber, group], index) => {
+                                var lowerLimit;
+                                var upperLimit;
+                                const seriesData = group.map((data, i) => {
+                                    lowerLimit = data.LowerLimit;
+                                    upperLimit = data.UpperLimit;
+                                    return { x: runningIndex + i, y: data.Measurement };
+                                });
+                                runningIndex += group.length; // Update the running index for the next series
+                                return {
+                                    name: `Cavity ${cavityNumber}`,
+                                    data: seriesData,
+                                    specs: { "lowerLimit": lowerLimit, "upperLimit": upperLimit },
+
+
+
+                                };
+                            });
+                            const columns = inspectionData.map(({ SampleNumber }) => SampleNumber);
+                            resolve({ name, data, columns });
+                        },
+                        error: (xhr, status, error) => {
+                            reject(error);
+                        }
+                    });
+                });
+            });
+
+            let graphs = await Promise.all(ajaxPromises);
+            console.log(graphs)
+            //Check if graphs.length is more than 1, meaning more than 1 Lot. if it is, then use R chart instead of MR CHart
+            if (graphs.length > 1) {
+                isRChart = true;
+            }
+            let groupedData = [];
+            let columns = [];
+            let xAnnotation = [];
+            var yAnnotation = []
+
+            graphs.forEach((lot) => {
+                // Iterate over each cavity in the lot
+                lot.data.forEach((cavity) => {
+                    let cavityName = cavity.name;
+                    let cavityData = [];
+                    let specs = cavity.specs;
+
+                    // Iterate over each data point in the cavity and push them into cavityData
+                    cavity.data.forEach((datum) => {
+                        cavityData.push({ x: datum.x, y: parseFloat(datum.y) });
+                    });
+
+                    // Push the complete data for the cavity into groupedData
+                    groupedData.push({ lot: lot.name, name: cavityName, data: cavityData, specs: specs });
+
+                });
+            });
+            groupedData.sort((a, b) => a.name.localeCompare(b.name));
+            let runningNumber = 1;
+            let sorted = groupedData.map((cavity) => {
+                let cavityName = cavity.name;
+                let cavityData = [];
+                let specs = cavity.specs;
+
+                cavity.data.forEach((datum) => {
+                    cavityData.push({ x: runningNumber, y: parseFloat(datum.y) }); // Increment runningNumber after assigning it
+                    columns.push(runningNumber)
+                    runningNumber++;
+                });
+                xAnnotation.push({
+                    x: runningNumber,
+                    cavity: cavity.name,
+                    borderColor: '#775DD0',
+                    label: {
+                        style: {
+                            color: 'black',
+                        },
+                        text: cavityName
+                    }
+                })
+                return { cavity: cavity.name, lotname: cavity.lot, label: cavity.lot, data: cavityData, specs: specs };
+            });
+
+            partPerformanceObj.lowerLimit = sorted[0].specs.lowerLimit;
+            partPerformanceObj.upperLimit = sorted[0].specs.upperLimit;
+
+            columns.unshift(0)
+            console.log(sorted)
+            var minMax = getMinMax(sorted);
+            console.log(minMax)
+            sorted.forEach((x) => {
+                var y = {
+                    y: 1.84,
+                    borderColor: '#775DD4',
+                    width: `${(x.data.length / columns.length) * 100}%`,
+                    label: {
+                        style: {
+                            color: 'black',
+                        },
+                        text: `${x.name}`
+                    }
+
+                }
+                yAnnotation.push(y);
+            });
+            const yAnnotations = getAnnotations(sorted);
+            const options = {
+                responsive: !0,
+                maintainAspectRatio: !1,
+                legend: { display: !1 },
+                tooltips: { intersect: !1 },
+                hover: { intersect: !0 },
+                plugins: { filler: { propagate: !1 } },
+                scales: {
+                    y: {
+
+                        suggestedMin: isRChart ? minMax.min - (minMax.min * 0.10) : minMax.min,
+                        suggestedMax: isRChart ? minMax.max + (minMax.max * 0.10) : minMax.max,
+                        grid: {
+                            display: false
+                        },
+
+                    },
+                    x: {
+                        display: isRChart ? false : true,
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: isRChart ? "xBar CHART" : 'x CHART'
+                    }
+                }
+            };
+
+            const ctx = document.getElementById('xChart').getContext('2d');
+            const arbitraryLine = {
+
+                id: 'arbitraryLine',
+                beforeDraw(chart, args, options) {
+                    const { ctx, chartArea: { top, right, bottom, left, width, height }, scales: { x, y } } = chart;
+                    ctx.save();
+                    xAnnotation.forEach((xAnno, index) => {
+                        const firstIndex = getFirstIndexByName(xAnnotation, xAnno.cavity);
+                        const lastIndex = getLastIndexByName(xAnnotation, xAnno.cavity);
+
+                        ctx.strokeStyle = "grey";
+                        ctx.lineWidth = 0.5;
+                        if (lastIndex == index) {
+                            ctx.strokeStyle = "black";
+                            ctx.lineWidth = 1;
+                        }
+                        ctx.setLineDash([5, 5]);
+                        ctx.strokeRect(x.getPixelForValue(xAnno.x - 0.5), top, 0, height);
+                        ctx.restore();
+
+                    });
+                    yAnnotations.forEach((yAnno, index) => {
+                        var x1Value;
+                        var xValue;
+                        const firstIndex = getFirstIndexByName(xAnnotation, yAnno.name);
+                        const lastIndex = getLastIndexByName(xAnnotation, yAnno.name);
+                        if (index == 0) {
+                            xValue = 0;
+                            x1Value = xAnnotation[lastIndex].x - 0.5;
+                        }
+                        else {
+                            xValue = xAnnotation[firstIndex - 1].x - 0.5;
+                            x1Value = xAnnotation[lastIndex].x - 0.5;
+                        }
+                        //For Specs
+                        if (yAnno.annotations.specs.usl) {
+                                ctx.strokeStyle = "purple";
+                                ctx.lineWidth = 2;
+                                ctx.setLineDash([3, 3]);
+                                ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.specs.usl));
+                                ctx.lineTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.specs.usl));
+                                ctx.stroke();
+                                ctx.restore();
+                        }
+
+                        if (yAnno.annotations.specs.lsl) {
+                            ctx.strokeStyle = "purple";
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.specs.lsl));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.specs.lsl));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+
+
+                        // console.log(`getFirstIndexByName ${getFirstIndexByName(xAnnotation, yAnno.name)} getLastIndexByName ${getLastIndexByName(xAnnotation, yAnno.name)} `)
+                        if (yAnno.annotations.avg) {
+                            ctx.strokeStyle = "black";
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.avg));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.avg));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                        if (yAnno.annotations.zoneA.lower) {
+                            ctx.strokeStyle = "red";
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.zoneA.lower));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.zoneA.lower));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                        if (yAnno.annotations.zoneA.upper) {
+                            ctx.strokeStyle = "red";
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.zoneA.upper));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.zoneA.upper));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                        if (yAnno.annotations.zoneB.lower) {
+                            ctx.strokeStyle = "blue";
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.zoneB.lower));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.zoneB.lower));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                        if (yAnno.annotations.zoneB.upper) {
+                            ctx.strokeStyle = "blue";
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.zoneB.upper));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.zoneB.upper));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                        if (yAnno.annotations.zoneC.upper) {
+                            ctx.strokeStyle = "green";
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.zoneC.upper));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.zoneC.upper));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                        if (yAnno.annotations.zoneC.lower) {
+                            ctx.strokeStyle = "green";
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(x.getPixelForValue(x1Value), y.getPixelForValue(yAnno.annotations.zoneC.lower));
+                            ctx.lineTo(x.getPixelForValue(xValue), y.getPixelForValue(yAnno.annotations.zoneC.lower));
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    });
+
+                }
+            }
+
+            const data = {
+                labels: columns,
+                datasets: sorted
+            };
+
+            const config = {
+                type: 'line',
+                data: data,
+                options: options,
+                plugins: [arbitraryLine]
+
+            }
+
+        if (xChart !== null) {
+            xChart.destroy();
+        }
+          xChart = new Chart(
+                    ctx, config
+            )
+            console.log(sorted);
+            limits = yAnnotations.map((cavity) => {
+                return {
+                    "cavity": cavity.name,
+                    "iChart":
+                    {
+                        "lcl": cavity.annotations.iChart.lcl,
+                        "ucl": cavity.annotations.iChart.ucl,
+                    },
+                    "xBarChart":
+                    {
+                        "lcl": cavity.annotations.xBarChart.lcl,
+                        "ucl": cavity.annotations.xBarChart.ucl,
+                    },
+                    "rChart":
+                    {
+                        "lcl": cavity.annotations.rChart.lcl,
+                        "ucl": cavity.annotations.rChart.ucl,
+                    },
+                    "mrChart":
+                    {
+                        "lcl": cavity.annotations.mrChart.lcl,
+                        "ucl": cavity.annotations.mrChart.ucl,
+                    },
+
+                }
+            });
+            let runningNumberMr = 1;
+
+            const iMrChart1 = yAnnotations.map((cavity) => {
+                //add function that inserts data to performanceObj
+
+                const mrData = cavity.annotations.mrChart.data.map((value) => {
+                    return { x: runningNumberMr++, y: value.y };
+                });
+
+                return {
+                    iChart: {
+                        mean: cavity.annotations.rChart.mean,
+                        stdDev: cavity.annotations.rChart.stdDev,
+                        label: cavity.name
+                    },
+                    mrChart: {
+                        data: mrData,
+                        average: cavity.annotations.mrChart.average,
+                        limit: { lcl: cavity.annotations.mrChart.lcl, ucl: cavity.annotations.mrChart.ucl },
+                        label: cavity.name
+                    },
+                    name: cavity.name
+                };
+            });
+
+            const mChart = iMrChart1.map((m) => {
+                return {
+                    data: m.mrChart.data,
+                    label: m.name,
+                    avg: m.mrChart.average,
+                    limit: m.mrChart.limit,
+                    specs: { "lowerLimit": m.mrChart.limit.lcl, "upperLimit": m.mrChart.limit.ucl}
+
+                };
+            });
+
+            console.log(mChart);
+            var minMaxMr = getMinMax(mChart);
+            const optionsMr = {
+                responsive: !0,
+                maintainAspectRatio: !1,
+                legend: { display: !1 },
+                tooltips: { intersect: !1 },
+                hover: { intersect: !0 },
+                plugins: { filler: { propagate: !1 } },
+                scales: {
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        suggestedMin: isRChart ? minMaxMr.min : "",
+                        suggestedMax: isRChart ? minMaxMr.max : ""
+                    },
+                    x: {
+                        display: isRChart ? false : true,
+                        grid: {
+                            display: false,
+                        }
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: isRChart ? "R CHART" : 'MR CHART'
+                    }
+                }
+            };
+
+            const dataMr = {
+                labels: columns,
+                datasets: mChart,
+            };
+
+            const arbitraryLineMr = {
+                id: 'arbitraryLine',
+                beforeDraw(chart, args, options) {
+                    const { ctx, chartArea: { top, right, bottom, left, width, height }, scales: { x, y } } = chart;
+                    ctx.save();
+
+                        mChart.forEach((el) => {
+                            const x1Value = el.data[el.data.length - 1].x;
+                            const xValue = el.data[0].x;
+
+                            if (!isRChart) {
+                                ctx.strokeStyle = "grey";
+                                ctx.lineWidth = 1;
+                                ctx.setLineDash([5, 5]);
+                                ctx.strokeRect(x.getPixelForValue(x1Value + 0.5), top, 0, height);
+
+                                if (el.avg) {
+                                    ctx.strokeStyle = "black";
+                                    ctx.lineWidth = 2;
+                                    ctx.setLineDash([5, 5]);
+                                    ctx.beginPath();
+                                    ctx.moveTo(x.getPixelForValue(x1Value + 0.5), y.getPixelForValue(el.avg));
+                                    ctx.lineTo(x.getPixelForValue(xValue - 0.5), y.getPixelForValue(el.avg));
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+                                if (el.limit.lcl) {
+                                    ctx.strokeStyle = "red";
+                                    ctx.lineWidth = 2;
+                                    ctx.setLineDash([7, 7]);
+                                    ctx.beginPath();
+                                    ctx.moveTo(x.getPixelForValue(x1Value + 0.5), y.getPixelForValue(el.limit.lcl));
+                                    ctx.lineTo(x.getPixelForValue(xValue - 0.5), y.getPixelForValue(el.limit.lcl));
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+                                if (el.limit.ucl) {
+                                    ctx.strokeStyle = "red";
+                                    ctx.lineWidth = 2;
+                                    ctx.setLineDash([7, 7]);
+                                    ctx.beginPath();
+                                    ctx.moveTo(x.getPixelForValue(x1Value + 0.5), y.getPixelForValue(el.limit.ucl));
+                                    ctx.lineTo(x.getPixelForValue(xValue - 0.5), y.getPixelForValue(el.limit.ucl));
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+                            }
+
+                        });
+
+                    if (isRChart) {
+                        xAnnotation.forEach((xAnno, index) => {
+                            const firstIndex = getFirstIndexByName(xAnnotation, xAnno.cavity);
+                            const lastIndex = getLastIndexByName(xAnnotation, xAnno.cavity);
+
+                            ctx.strokeStyle = "grey";
+                            ctx.lineWidth = 0.5;
+                            if (lastIndex == index) {
+                                ctx.strokeStyle = "black";
+                                ctx.lineWidth = 1;
+                            }
+                            ctx.setLineDash([5, 5]);
+                            ctx.strokeRect(x.getPixelForValue(xAnno.x - 0.5), top, 0, height);
+                            ctx.restore();
+
+                        });
+                       }
+                }
+            }
+            const configMr = {
+                type: 'line',
+                data: isRChart ? data : dataMr,
+                options: optionsMr,
+                plugins: [arbitraryLineMr]
+
+            }
+            const ctxMr = document.getElementById('mrChart').getContext('2d');
+
+            if (mrChart !== null) {
+                mrChart.destroy();
+            }
+
+            mrChart = new Chart(
+                ctxMr, configMr
+            )
+                    //Download Part Performance Chart
+
+            if (isRChart) {
+                partPerformanceObj.HeaderTitle = "1"
+            } else {
+                partPerformanceObj.HeaderTitle = "2"
+
+            }
+
+        });
+
+    $(document).on('click', '#reportButton', function () {
+            var chartType = $(this).attr('data-action');
+
+        var canvas = document.getElementById('xChart');
+        var canvaMr = document.getElementById('mrChart');
+        var canvasR = document.getElementById('rChart');
+        var base64Image = canvas.toDataURL('image/png');
+        var base64ImageMr = canvaMr.toDataURL('image/png');
+        var base64ImageR = canvasR.toDataURL('image/png');
+        var formData = new FormData();
+            if (chartType == 'downloadPartPerformance') {
+                formData.append('imageX', base64Image);
+                formData.append('imageMr', base64ImageMr);
+                formData.append('action', "xBar");
+            }
+            else {
+                formData.append('imageR', base64ImageR);
+                formData.append('action', "rChart");
+            }
+
+        formData.append('jsonData', JSON.stringify(partPerformanceObj));
+        formData.append('partData', JSON.stringify(limits));
+
+
+        $.ajax({
+        url: '@Url.Action("ExportPartPerformance", "PartsIq")',
+        method: "POST",
+        contentType: false,
+        processData: false,
+        data: formData,
+        xhrFields: {
+            responseType: 'blob' // Set the response type to blob
+        },
+            success: function (blob, status, xhr) {
+                if (status != 'success') {
+                    alertify.error("Error encountered");
+                }
+                else {
+                    alertify.success("File downloaded");
+                    var contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                    var filename = 'chart.xlsx'; // Default filename
+                    if (contentDisposition) {
+                        var match = contentDisposition.match(/filename="(.+)"/);
+                        if (match) {
+                            filename = match[1];
+                        }
+                    }
+
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }
+
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+});
+
+    $(document).on('click', '#partPerformanceBtn', async function () {
+        try {
+            var checkSupplier = $('#supplierPa option:selected').val();
+            if (checkSupplier == null || checkSupplier === "null") {
+            return false;
+            }
+            var btn = $(this);
+            var loadingBtn = $(`<button type="submit" class="btn btn-sm btn-primary" id="partPerformanceBtn"  disabled>
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    Loading...
+                </button>`);
+
+
+            let checkpointId = $('#checkpointPa').val();
+            let fromDate = $('#fromDatePa').val();
+            let toDate = $('#toDatePa').val();
+            console.log(`From ${fromDate} to ${toDate}`);
+            if (fromDate > toDate) {
+                alertify.error("Please select a valid range");
+                return;
+            } else if (checkSupplier == "null" || checkSupplier == null || checkSupplier.length == 0) {
+                alertify.error("Please select a parts code");
+                return;
+            }
+            btn.replaceWith(loadingBtn);
+            console.log(suppliers);
+            let uniqueIds = {};
+            let lotNumber = [];
+            for (const item of suppliers) {
+                if (item.DateFinished != null) {
+                    let dateFinished = parseDateNum(item.DateFinished);
+                    if (dateFinished >= fromDate
+                        && dateFinished <= toDate) {
+                        if (!uniqueIds[item.InspectionId]) {
+                            uniqueIds[item.InspectionId] = true;
+                            const inspectionData = await $.ajax({
+                                url: '@Url.Action("GetInspectionInfoPerId", "PartsIq")',
+                                method: "GET",
+                                data: {
+                                    id: item.InspectionId
+                                }
+                            });
+                            lotNumber.push({ ...item, CheckpointId: checkpointId, InspectionItem: inspectionData });
+                        }
+                    }
+                }
+    }
+            if (lotNumber.length > 0) {
+            partPerformanceObj.partName = lotNumber[0].PartName;
+            $('#plotXChart').prop("disabled", false);
+            $('#plotRChart').prop("disabled", false);
+            }
+
+    $('#partPerformanceTable').bootstrapTable('destroy');
+    if (!$('#partPerformanceTable').hasClass('bootstrap-table')) {
+        // Initialize the table if it hasn't been initialized yet
+        $('#partPerformanceTable').bootstrapTable({
+            data: lotNumber,
+            columns: [
+                {
+                    title: "CheckBox",
+
+                },
+                {
+                    field: 'LotNumber',
+                    title: 'Lot No.'
+                },
+                {
+                    field: 'Specification',
+                    title: 'Specification',
+                    formatter: function (value, row, index) {
+                        // Filter the InspectionItem array to get items with WithInvalid equal to 1
+                        const invalidItems = row.InspectionItem.filter(item => item.WithInvalid === 1);
+
+                        // If there are invalid items, construct the content
+                        if (invalidItems.length > 0) {
+                            // Assuming 'PartsCode' represents the specification in your data
+                            const specifications = invalidItems.map(item => formatSpecification(item.Specification)).join(', '); // Example content
+
+                            return specifications;
+                        } else {
+                            return ''; // No invalid items
+                        }
+                    }
+                },
+                {
+                    title: 'NG Checkpoint No.',
+                    formatter: function (value, row, index) {
+                        // Check if InspectionItem has any item with WithInvalid equal to 1
+                        const invalidItems = row.InspectionItem.filter(item => item.WithInvalid === 1);
+
+                        // If there are invalid items, construct the content
+                        if (invalidItems.length > 0) {
+                            const content = invalidItems.map(item => `${item.CCode}`).join(', '); // Example content
+                            return content;
+                        } else {
+                            return ''; // No invalid items
+                        }
+                    }
+                }
+            ]
+        });
+    } else {
+        // Refresh the data if the table has already been initialized
+        $('#partPerformanceTable').bootstrapTable('load', lotNumber);
+    }
+    loadingBtn.replaceWith(btn);
+            }
+                  catch (error) {
+                      alertify.error(`Error ${error} occured. Contact administrator`);
+                      loadingBtn.replaceWith(btn);
+                  }
+                   });
+
+    $(document).on('change', '#supplierPa', function () {
+                   let supplierId = $(this).val();
+                   let fromDate = $('#fromDatePa').val();
+                   let toDate = $('#toDatePa').val();
+                   $('#cavityNumberPa').empty();
+                   let supplier = suppliers.filter(supplier => supplier.SupplierId == supplierId);
+
+        if (supplier.length > 0) {
+            $('#partPerformanceBtn').prop("disabled", false);
+            $('#cavityNumberPa').append('<option value="null" selected>All</option>');
+            supplier.forEach(cavity => {
+                // Check if cavity.DateFinished is not null
+                if (cavity.DateFinished !== null) {
+                    // Parse the cavity.DateFinished to compare with fromDate and toDate
+                    var parsedDate = parseDateNum(cavity.DateFinished);
+                    // Check if the parsed date is within the fromDate and toDate range
+                    if (parsedDate >= fromDate && parsedDate <= toDate) {
+                        // Check if an option with the same text already exists
+                        if ($('#cavityNumberPa option').filter(function () {
+                            return $(this).text() === cavity.CavityNumber;
+                        }).length === 0 && cavity.CavityNumber !== null) {
+                            $('#cavityNumberPa').append($('<option>', {
+                                text: cavity.CavityNumber,
+                                value: cavity.CavityId,
+                                'data-supplierid': cavity.SupplierId
+                            }));
+                        }
+                    }
+                }
+            });
+
+        }
+        else {
+            $('#partPerformanceBtn').prop("disabled", true);
+        }
+
+               });
+
+
+
+        //Part Performance Form
+    });
+    </script>
+}
+
