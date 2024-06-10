@@ -965,7 +965,7 @@ namespace PartsMysql.Controllers
                     int numRow = 13;
                     foreach (var inspection in inspectionStats)
                     {
-                        DateTime dateDelivered = inspection.InspectionStart ?? DateTime.Now;
+                        DateTime dateDelivered = inspection.DateDelivered ?? DateTime.Now;
                         worksheet.Cells["B" + numRow].Value = dateDelivered.ToString("MMM dd, yyyy"); ;
                         worksheet.Cells["C" + numRow].Value = inspection.DrNumber;
                         worksheet.Cells["D" + numRow].Value = inspection.PartCode;
@@ -1325,6 +1325,62 @@ namespace PartsMysql.Controllers
             catch (Exception ex)
             {
                 return new List<NcrDetails> ();
+            }
+        }
+
+        public ActionResult GetPartQualityPerformance(FormCollection formData = null)
+        {
+            var res = GetQualityPerformanceFn(formData);
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
+
+        public List<InspectionSummary> GetQualityPerformanceFn(FormCollection formData = null)
+        {
+            try
+            {
+                DateTime startDate = DateTime.Now.AddYears(-1);
+                DateTime endDate = DateTime.Now;
+                DateTime? fromDate = startDate;
+                DateTime? toDate = endDate;
+                long? supplierId = null;
+                long? partId = null;
+                if (formData != null)
+                {
+                    if (!string.IsNullOrEmpty(formData["fromDatPartQuality"]) && formData["fromDatPartQuality"] != "null" && DateTime.TryParse(formData["fromDatPartQuality"], out DateTime parsedFromDate))
+                    {
+                        fromDate = parsedFromDate;
+                    }
+                    if (!string.IsNullOrEmpty(formData["supplierQualityPerf"]) && formData["supplierQualityPerf"] != "null" && long.TryParse(formData["supplierQualityPerf"], out long supplierIdP))
+                    {
+                        supplierId = supplierIdP;
+                    }
+                    if (!string.IsNullOrEmpty(formData["partQualityPerf"]) && formData["partQualityPerf"] != "null" && long.TryParse(formData["partQualityPerf"], out long partIdP))
+                    {
+                        partId = partIdP;
+                    } 
+
+                    // Handle toDateIs
+                    if (!string.IsNullOrEmpty(formData["toDatPartQuality"]) && formData["toDatPartQuality"] != "null" && DateTime.TryParse(formData["toDatPartQuality"], out DateTime parsedToDate))
+                    {
+                        toDate = parsedToDate;
+                    }
+
+                    //if (!string.IsNullOrEmpty(formData["eventLl"]) && formData["eventLl"] != "null")
+                    //{
+                    //    logEvent = formData["eventLl"];
+                    //}
+                    //if (!string.IsNullOrEmpty(formData["userLl"]) && formData["userLl"] != "null" && long.TryParse(formData["UserLl"], out long userLl))
+                    //{
+                    //    userId = userLl;
+                    //}
+                }
+                var res = dbMysql.GetPartQualityPerformance(fromDate, toDate, partId, supplierId);
+                return res;
+               
+            }
+            catch (Exception ex)
+            {
+                return new List<InspectionSummary> ();
             }
         }
     }

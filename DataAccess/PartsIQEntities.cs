@@ -323,5 +323,43 @@ namespace PartsMysql.DataAccess
                 return new List<NcrDetails>();
             }
         }
+
+
+        public List<InspectionSummary> GetPartQualityPerformance(DateTime? fromDate = null, DateTime? toDate = null, long? partId = null, long? supplierId = null)
+        {
+            try
+            {
+                Debug.WriteLine(supplierId);
+                var query = new StringBuilder("SELECT * FROM [PartsIQ].[dbo].[GetPartQualityPerformanceByDateRange](@StartDate, @EndDate) WHERE 1 = 1 ");
+                List<SqlParameter> parameters = new List<SqlParameter>
+        {
+            new SqlParameter("@StartDate", fromDate ?? (object)DBNull.Value),
+            new SqlParameter("@EndDate", toDate ?? (object)DBNull.Value)
+        };
+
+                if (supplierId != null)
+                {
+                    query.Append("AND SupplierId = @SupplierId ");
+                    parameters.Add(new SqlParameter("@SupplierId", supplierId));
+                }
+                if (partId != null)
+                {
+                    query.Append("And PartId = @PartId");
+                    parameters.Add(new SqlParameter("@PartId", partId));
+                        
+                }
+                // Add more filters if needed similarly
+
+                Debug.WriteLine(query.ToString());
+                return this.Database.SqlQuery<InspectionSummary>(query.ToString(), parameters.ToArray()).ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                return new List<InspectionSummary>();
+            }
+        }
+
+
     }
 }
