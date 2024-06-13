@@ -293,6 +293,7 @@
     <Compile Include="Models\InspectionSummary.cs" />
     <Compile Include="Models\LargeJsonResult.cs" />
     <Compile Include="Models\Logs.cs" />
+    <Compile Include="Models\ModelExtension.cs" />
     <Compile Include="Models\MSreplication_options.cs">
       <DependentUpon>PartsIq_Model.tt</DependentUpon>
     </Compile>
@@ -344,6 +345,7 @@
     <Compile Include="Models\Suppliers.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\AuthorizationHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\libs\apexcharts\apexchartsv2.js" />
