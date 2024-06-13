@@ -293,6 +293,7 @@
     <Compile Include="Models\InspectionSummary.cs" />
     <Compile Include="Models\LargeJsonResult.cs" />
     <Compile Include="Models\Logs.cs" />
+    <Compile Include="Models\ModelExtension.cs" />
     <Compile Include="Models\MSreplication_options.cs">
       <DependentUpon>PartsIq_Model.tt</DependentUpon>
     </Compile>
@@ -344,6 +345,7 @@
     <Compile Include="Models\Suppliers.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\AuthorizationHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\libs\apexcharts\apexchartsv2.js" />
@@ -2405,8 +2407,6 @@
     </Content>
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Shared\Error.cshtml" />
-    <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -2416,14 +2416,8 @@
     <Content Include="Views\Inspections\Edit.cshtml" />
     <Content Include="Views\Inspections\Index.cshtml" />
     <Content Include="Views\InspectionsMy\Index.cshtml" />
-    <Content Include="Views\Shared\_Layout - Copy.cshtml" />
-    <Content Include="Views\Shared\_Header.cshtml" />
-    <Content Include="Views\Shared\_Sidebar.cshtml" />
-    <Content Include="Views\Shared\_PageHeader.cshtml" />
     <Content Include="Views\InspectionsMy\PartPerformance.cshtml" />
-    <Content Include="Views\PartsIq\Index.cshtml" />
     <Content Include="assets\excelFiles\Inspection.xlsx" />
-    <Content Include="Views\Shared\Footer.cshtml" />
     <Content Include="Views\PartsIq\Index2.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -2432,6 +2426,7 @@
     <Folder Include="assets\template\" />
     <Folder Include="public\" />
     <Folder Include="Templates\" />
+    <Folder Include="Views\Shared\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

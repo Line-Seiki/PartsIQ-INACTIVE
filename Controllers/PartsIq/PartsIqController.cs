@@ -25,8 +25,11 @@ using PartsMySql.Models;
 using Org.BouncyCastle.Utilities;
 using System.Text;
 
+
 namespace PartsMysql.Controllers
 {
+    //[Authorize]
+    //[CustomAuthorize(MainModule.QualityAssurance, SubModule.Calibration)]
     public class PartsIqController : Controller
     {
         // GET: PartsIq
@@ -914,7 +917,7 @@ namespace PartsMysql.Controllers
                 DateTime endDate = DateTime.Now;
                 DateTime? fromDateIs = startDate;
                 DateTime? toDateIs = endDate;
-                var partCode = formCollection["partsCodeIs"];
+                var partCode = formCollection["partCode"];
 
                 if (formCollection != null)
                 {
@@ -1038,7 +1041,7 @@ namespace PartsMysql.Controllers
                 DateTime endDate = DateTime.Now;
                 DateTime? fromDateIs = startDate;
                 DateTime? toDateIs = endDate;
-                long? partsCodeIs = null;
+                string partsCodeIs = null;
                 string minMaxIs = null;
                 string inspectorIs = null;
 
@@ -1063,10 +1066,11 @@ namespace PartsMysql.Controllers
 
 
                     // Handle partsCodeIs
-
-                    if (!string.IsNullOrEmpty(formData["partsCodeIs"]) && formData["partsCodeIs"] != "null" && long.TryParse(formData["partsCodeIs"], out long parsedPartsCode))
+                    Debug.WriteLine("testttt" + (string)formData["partCode"]);
+                    if (!string.IsNullOrEmpty(formData["partsCodeIs"]) && formData["partsCodeIs"] != "null" )
                     {
-                        partsCodeIs = parsedPartsCode;
+                       
+                        partsCodeIs = formData["partCode"];
                     }
 
 

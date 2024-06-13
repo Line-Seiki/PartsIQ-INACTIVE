@@ -194,11 +194,11 @@ namespace PartsMysql.DataAccess
             }
         }
 
-        public List<InspectionStatistics> GetInspectionStatistics(DateTime? fromDateIs = null, DateTime? toDateIs = null, string inspectorIs = null, string minMaxIs = null, long? partsCodeIs = null)
+        public List<InspectionStatistics> GetInspectionStatistics(DateTime? fromDateIs = null, DateTime? toDateIs = null, string inspectorIs = null, string minMaxIs = null, string partsCodeIs = null)
         {
             try
             {
-                Debug.WriteLine(inspectorIs);
+                Debug.WriteLine(partsCodeIs);
                 // Initialize the base query
                 var sqlQuery =
                     "SELECT InspectionId, Decision, DateDelivered, ControlNumber, DateFinished, LotNumber, LotQuantity, SampleSize, InspectionDuration, EvaluationDuration, InspectionStart, InspectionEnd, Comments, InspectorComments, " +
@@ -220,10 +220,11 @@ namespace PartsMysql.DataAccess
                     parameters.Add(new SqlParameter("@Inspector", inspectorIs));
 
             }
-                if (partsCodeIs !=null && partsCodeIs >= 0)
+                if (partsCodeIs !=null && partsCodeIs != "null")
                 {
-                    sqlQuery += " AND PartId = @PartId";
-                    parameters.Add(new SqlParameter("@PartId", partsCodeIs));
+                    sqlQuery += " AND (PartCode = @PartCode OR PartCode LIKE @PartCodePattern)";
+                    parameters.Add(new SqlParameter("@PartCode", partsCodeIs));
+                    parameters.Add(new SqlParameter("@PartCodePattern", $"{partsCodeIs}-%"));
                 }
                 sqlQuery += " ORDER BY [DateDelivered] DESC";
                 Debug.WriteLine(sqlQuery);
