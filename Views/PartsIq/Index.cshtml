@@ -665,10 +665,21 @@
                         <div class="d-flex justify-content-center">
                             <form id="partQualityPerfForm">
                                 <div class="row border border-1 border round fs-12 m-2">
-                                    <div class="col-md-12 p-2">
+                                    <div class="col-md-6 p-2">
+                                        <div class="form-group floating-label enable-floating-label show-label now">
+                                            <label for="fromDatPartQuality" class="fw-bolder">From</label>
+                                            <input type="date" id="fromDatPartQuality" name="fromDatPartQuality" class="form-control form-control-sm fromDate" required>
+                                        </div>
                                         <div class="form-group floating-label enable-floating-label show-label">
                                             <label for="partQualityPerf" class=" fw-bolder">Parts Code</label>
                                             <select type="text" id="partQualityPerf" name="partQualityPerf" class="form-control  form-control-sm partsCodeSelect" required> </select>
+                                        </div>
+                                    
+                                    </div>
+                                    <div class="col-md-6 p-2">
+                                        <div class="form-group floating-label enable-floating-label show-label now">
+                                            <label for="toDatPartQuality" class="fw-bolder">To</label>
+                                            <input type="date" id="toDatPartQuality" name="toDatPartQuality" class="form-control form-control-sm toDate" required>
                                         </div>
                                         <div class="form-group floating-label enable-floating-label show-label">
                                             <label for="supplierQualityPerf" class="fw-bolder">Supplier</label>
@@ -1643,7 +1654,7 @@
                                             } else {
                                                 return parseTime(data - row.InspectionDuration)
                                             }
-                                            
+
                                         }
 
                                     },
@@ -1830,7 +1841,7 @@
                         // DataTable already initialized, destroy it
                         var table = $("#partQualityPerfTbl").DataTable();
                         table.clear().rows.add(response).draw();
-                    }                
+                    }
                 }
                 loadingBtn.replaceWith(btn); // Restore the original submit button
             },
@@ -2021,7 +2032,7 @@
     function getNcrList() {
         try {
 
-            //event handler to disable export button if selected supplier is null
+            $('#ncrListExportBtn').prop("disabled", true);
 
 
             //Reset the selects
@@ -2105,7 +2116,8 @@
         getNcrList.call(this);
     });
 
-    $(document).on('submit', '#ncrListForm', function (event) {
+          $(document).on('submit', '#ncrListForm', function (event) {
+       
               event.preventDefault();
 
               //let partcoden = $('#partcoden option:selected').val();
@@ -2212,46 +2224,56 @@
         event.preventDefault();
         var formData = new FormData(this); // Directly pass the form element to FormData
         var minMax = $('#minMaxIs option:selected').val();
-        var partCode = $('#partsCodeIs option:selected').val();
+        var partCode = $('#partsCodeIs option:selected').text().trim();
+        formData.append("partCode", partCode);
 
-        $.ajax({
+       $.ajax({
             url: '@Url.Action("GetInspectionStatistics", "PartsIq")',
             contentType: false,
             processData: false,
             data: formData,
             method: "POST",
             success: function (response) {
-                if (response && Array.isArray(response)) {
-                    if (minMax == 'min') {
-                        let minObj = response.reduce((ac, value) => {
-                            return value.InspectionDuration < ac.InspectionDuration ? value : ac;
-                        }, { InspectionDuration: Number.POSITIVE_INFINITY });
-                        console.log(minObj);
-                        response = [minObj];
-                    }
-                    else if (minMax == 'max') {
-                        let maxObj = response.reduce((ac, value) => {
-                            return value.InspectionDuration > ac.InspectionDuration ? value : ac;
-                        }, { InspectionDuration: Number.NEGATIVE_INFINITY });
-                        console.log(maxObj);
-                        response = [maxObj];
-                    }
-                    inspectionStat.clear().rows.add(response).draw();
-                    inspectionStatsSummary(response, partCode);
+            if (response && Array.isArray(response)) {
+                // Filter out entries with InspectionDuration of 0
+                inspectionStatsSummary(response, partCode);
 
 
-                    window.location.href = `#inspectionStatsTbl`;
+                response = response.filter(value => value.InspectionDuration > 0);
+
+                if (minMax === 'min') {
+                    // Find the entry with the minimum InspectionDuration
+                    let minObj = response.reduce((ac, value) => {
+                        return value.InspectionDuration < ac.InspectionDuration ? value : ac;
+                    }, { InspectionDuration: Number.POSITIVE_INFINITY });
+                    console.log(minObj);
+                    response = [minObj];
+                } else if (minMax === 'max') {
+                    // Find the entry with the maximum InspectionDuration
+                    let maxObj = response.reduce((ac, value) => {
+                        return value.InspectionDuration > ac.InspectionDuration ? value : ac;
+                    }, { InspectionDuration: Number.NEGATIVE_INFINITY });
+                    console.log(maxObj);
+                    response = [maxObj];
                 }
-                else {
-                    alertify.error(`Error occured. Contact administrator`);
-                }
-                loadingBtn.replaceWith(btn);
-            },
-            error: function (error) {
-                alertify.error(`Error ${error}occured. Contact administrator`);
-                loadingBtn.replaceWith(btn);
+
+                // Clear the table, add new rows and draw the table
+                inspectionStat.clear().rows.add(response).draw();
+               
+
+                // Scroll to the inspection stats table
+                window.location.href = `#inspectionStatsTbl`;
+            } else {
+                alertify.error("Error occurred. Contact administrator");
             }
-        });
+            loadingBtn.replaceWith(btn);
+        },
+        error: function (error) {
+            alertify.error(`Error ${error} occurred. Contact administrator`);
+            loadingBtn.replaceWith(btn);
+        }
+    });
+
     });
 
     $('#inspectionStatBtn').on('click', function () {
@@ -2270,7 +2292,8 @@
 
     var form = $('#inspectionStatsForm')[0]; // Get the raw HTML form element
     var formData = new FormData(form); // Initialize FormData with the form element
-
+    var partCode = $('#partsCodeIs option:selected').text().trim();
+    formData.append("partCode", partCode);
     $.ajax({
         url: '@Url.Action("ExportInspectionStats", "PartsIq")',
         method: "POST",

@@ -23,7 +23,7 @@ namespace PartsMysql.Models
     {
         public int TotalPartsInspected { get; set; }
         public TimeSpan MaxInspectionTime { get; set; }
-        public TimeSpan MinInspectionTime { get; set; }
+        public TimeSpan MinInspectionTime { get; set; } 
         public TimeSpan AverageInspectionTime { get; set; }
 
         public InspectionStatsSummary Calculate (List<InspectionStatistics> stats)
@@ -38,17 +38,29 @@ namespace PartsMysql.Models
                     AverageInspectionTime = TimeSpan.Zero
                 };
             }
+            var validStats = stats.Where(s => s.InspectionDuration > 0).ToList();
 
-            var totalInspectionTime = stats.Sum(s => s.InspectionDuration ?? 0);
-            var maxInspectionTime = stats.Max(s => s.InspectionDuration ?? 0);
-            var minInspectionTime = stats.Min(s => s.InspectionDuration ?? 0);
+            if (validStats.Count == 0)
+            {
+                return new InspectionStatsSummary
+                {
+                    TotalPartsInspected = 0,
+                    MaxInspectionTime = TimeSpan.Zero,
+                    MinInspectionTime = TimeSpan.Zero,
+                    AverageInspectionTime = TimeSpan.Zero
+                };
+            }
+
+            var totalInspectionTime = validStats.Sum(s => s.InspectionDuration ?? 0);
+            var maxInspectionTime = validStats.Max(s => s.InspectionDuration ?? 0);
+            var minInspectionTime = validStats.Min(s => s.InspectionDuration ?? 0);
 
             return new InspectionStatsSummary
             {
-                TotalPartsInspected = stats.Count,
+                TotalPartsInspected = validStats.Count,
                 MaxInspectionTime = TimeSpan.FromMilliseconds(maxInspectionTime),
                 MinInspectionTime = TimeSpan.FromMilliseconds(minInspectionTime),
-                AverageInspectionTime = TimeSpan.FromMilliseconds(totalInspectionTime / stats.Count)
+                AverageInspectionTime = TimeSpan.FromMilliseconds(totalInspectionTime / validStats.Count)
             };
         }
 

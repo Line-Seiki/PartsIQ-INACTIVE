@@ -279,7 +279,6 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\PartsIq\PartsIqController.cs" />
     <Compile Include="DataAccess\MsSqlContext.cs" />
     <Compile Include="DataAccess\Mysql100Context.cs" />
     <Compile Include="DataAccess\MySqlContext.cs" />
@@ -2405,8 +2404,6 @@
     </Content>
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Shared\Error.cshtml" />
-    <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -2416,22 +2413,20 @@
     <Content Include="Views\Inspections\Edit.cshtml" />
     <Content Include="Views\Inspections\Index.cshtml" />
     <Content Include="Views\InspectionsMy\Index.cshtml" />
-    <Content Include="Views\Shared\_Layout - Copy.cshtml" />
-    <Content Include="Views\Shared\_Header.cshtml" />
-    <Content Include="Views\Shared\_Sidebar.cshtml" />
-    <Content Include="Views\Shared\_PageHeader.cshtml" />
     <Content Include="Views\InspectionsMy\PartPerformance.cshtml" />
     <Content Include="Views\PartsIq\Index.cshtml" />
     <Content Include="assets\excelFiles\Inspection.xlsx" />
-    <Content Include="Views\Shared\Footer.cshtml" />
     <Content Include="Views\PartsIq\Index2.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="assets\excelFiles\Templates\PartsIq\" />
     <Folder Include="assets\template\" />
+    <Folder Include="Controllers\PartsIq\" />
     <Folder Include="public\" />
     <Folder Include="Templates\" />
+    <Folder Include="Utility\" />
+    <Folder Include="Views\Shared\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
